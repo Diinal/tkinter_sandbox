@@ -6,13 +6,13 @@ import time, sys, math
 #   !!!)repare animation +
 #   1)thinking about amp and freq values and describe them +-
 #   2)create events for changing amp and freq +
-#   3)add phase constant phi
-#   4)add units labels like kGhz and others
-#   5)add units for scales
-#   6)!!! bind entry button
-#
-#
-#
+#   3)add phase constant signal_phi +
+#   4)add units labels like kGhz and others (i think it's not necessary)
+#   5)add units for scales +
+#   6)bind entry button+
+#   7)add carrying oscillation +
+#   8) freeze animation button === signal/carrying _frames = 0 as a constant
+#   9)sinchronize carry_amplitude with signal_amplitude +
 
 font_ = ('Arial', '14')
 background_ = '#f5f5f5'
@@ -26,7 +26,6 @@ root.resizable(1920, 1080)
 
 
 style = ttk.Style()
-
 style.theme_create( "hyummy", parent="alt", settings={
         "TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0] ,
                                     'background': background_} },
@@ -57,98 +56,198 @@ note.grid(row = 0, column = 0, sticky = ('N, W'))
 
 
 plot_container = LabelFrame(modulation,text = 'here would be some graphics', height = 960, width = 1280, font = font_)
-plot_container.grid(row = 0, column = 0,columnspan = 2, rowspan = 20, sticky = ('N, W, E, S'), padx = 3, pady = 6)
+plot_container.grid(row = 0, column = 0,columnspan = 2, rowspan = 60, sticky = ('N, W, E, S'), padx = 3, pady = 6)
 plot_container.configure(background = background_, foreground = foreground_)
 
-
+#canvas frames creating
+#TODO: add diffrent constant for signal, carrying oscillation and modulation plots
 width = 1200
 height = 300
 center = height // 2
-x_increment = 1
-x_factor = 0.1 # width stretch
-y_amplitude = 80 # height stretch
-phi = 0
+#x_increment = 1
+#signal
+signal_x_factor = 0.1 # width stretch
+signal_y_amplitude = 80 # height stretch
+signal_phi = 0
+#carrying osci
+carry_x_factor = 0.1 # width stretch
+carry_y_amplitude = 80 # height stretch
+carry_phi = 0
+#modulation
+#modulation_x_factor = 0.1 # width stretch
+#modulation_y_amplitude = 80 # height stretch
+#modulation_phi = 0
+
 x = [i for i in range(10, width)]
+
 #first frame with signal plot
 signal_frame = Canvas(plot_container, width = width, height = height, background= background_)
 signal_frame.grid(row = 0, column = 0, padx = 20, pady = 20)
 #line description
-signal_frame.create_text(30, 30, anchor=SW, text='signal plot', font = font_, fill = foreground_)
-signal_frame.create_line(140, 18, 200, 18, width = 5, fill = 'red')
+signal_frame.create_text(80, 30, anchor=SW, text='signal plot', font = font_, fill = foreground_)
+signal_frame.create_line(190, 18, 230, 18, width = 5, fill = 'red')
+signal_frame.create_text(20, 30, anchor = SW, text = 'U(t)', font = font_, fill = foreground_)
+signal_frame.create_text(width-10, center+20, anchor = E, text = 't', font = font_, fill = foreground_)
 center_line = signal_frame.create_line(10, center, width, center, fill=foreground_, arrow = LAST, width = 3)
 vertical_line_up = signal_frame.create_line(10, center, 10 , 5, fill=foreground_, arrow = LAST, width = 3)
 vertical_line_down = signal_frame.create_line(10, center, 10 , height - 5, fill=foreground_, arrow = LAST, width = 3)
 
-def freq_change(event):
-    global x_factor
-    x_factor = int(frequency.get()) / 100
+#second frame with carrying oscillation
+carry_frame = Canvas(plot_container, width = width, height = height, background= background_)
+carry_frame.grid(row = 21, column = 0, padx = 20, pady = 20)
+#line description
+carry_frame.create_text(80, 30, anchor=SW, text='несущее колебание', font = font_, fill = foreground_)
+carry_frame.create_line(290, 18, 340, 18, width = 5, fill = 'blue')
+carry_frame.create_text(20, 30, anchor = SW, text = 'U(t)', font = font_, fill = foreground_)
+carry_frame.create_text(width-10, center+20, anchor = E, text = 't', font = font_, fill = foreground_)
+center_line = carry_frame.create_line(10, center, width, center, fill=foreground_, arrow = LAST, width = 3)
+vertical_line_up = carry_frame.create_line(10, center, 10 , 5, fill=foreground_, arrow = LAST, width = 3)
+vertical_line_down = carry_frame.create_line(10, center, 10 , height - 5, fill=foreground_, arrow = LAST, width = 3)
 
-def amp_change(event):
-    global y_amplitude
-    y_amplitude = int(amplitude.get())
 
-def phase_change(event):
-    global phi
-    phi = int(phase.get())
+def signal_freq_change(event=None):
+    global signal_x_factor
+    signal_x_factor = int(signal_frequency.get()) / 100
+
+def carry_freq_change(event=None):
+    global carry_x_factor
+    carry_x_factor = int(carry_frequency.get()) / 100
+
+def signal_amp_change(event=None):
+    global signal_y_amplitude
+    signal_y_amplitude = int(signal_amplitude.get())
+
+def carry_amp_change(event=None):
+    global carry_y_amplitude
+    carry_y_amplitude = int(carry_amplitude.get())
+
+def signal_phase_change(event=None):
+    global signal_phi
+    signal_phi = int(signal_phase.get())
+
+def carry_phase_change(event=None):
+    global carry_phi
+    carry_phi = int(carry_phase.get())
 
 def anim():
     #plot generation and drawing
-    frame = 0
-    y0 = 1
+    signal_frames = 0
+    carry_frames = 0
+    #mod_frame = 0
+    global signal_y_amplitude, carry_y_amplitude
     while True:
         try:
-            y = [int(math.sin((i+frame + phi) * x_factor) * y_amplitude) + center for i in x]
-            xy = list(zip(x, y))
-            sin_line = signal_frame.create_line(xy, fill = 'red', width = 1)
-            if frame < ((1/x_factor) * 1250): #(x_factor * 1250): or freq = 10 === 63
-               frame += 1
+            signal_y = [int(math.sin((i+signal_frames + signal_phi) * signal_x_factor) * signal_y_amplitude) + center for i in x]
+            signal_xy = list(zip(x, signal_y))
+
+            #maybe this decision is note optimal
+            if carry_y_amplitude < signal_y_amplitude:
+                carry_y_amplitude = signal_y_amplitude
+                carry_amplitude.set(signal_y_amplitude)
+
+            carry_y = [int(math.sin((i+carry_frames + carry_phi) * carry_x_factor) * carry_y_amplitude) + center for i in x]
+            carry_xy = list(zip(x, carry_y))
+
+            signal_sin_line = signal_frame.create_line(signal_xy, fill = 'red', width = 1)
+            carry_sin_line = carry_frame.create_line(carry_xy, fill = 'blue', width = 1)
+
+            if signal_frames < ((1/signal_x_factor) * 1250): #(signal_x_factor * 1250): or freq = 10 === 63
+               signal_frames += 1
             else:
-                frame = 0
+                signal_frames = 0
+
+            if carry_frames < ((1/carry_x_factor) * 1250):
+               carry_frames += 1
+            else:
+                carry_frames = 0
+
             signal_frame.update()
             time.sleep(.01)
-            signal_frame.delete(sin_line)
+            signal_frame.delete(signal_sin_line)
+            carry_frame.delete(carry_sin_line)
         except Exception:
             sys.exit(0)
     root.mainloop()
 
+#Signal frequency
+signal_freq_lbl = ttk.Label(modulation, text = 'Частота', font = font_)
+signal_freq_lbl.grid(row = 0, column = 2, sticky = ('E'), padx = (20, 5))
+signal_freq_lbl.configure(background = background_, foreground = foreground_)
 
-freq_lbl = ttk.Label(modulation, text = 'Частота', font = font_)
-freq_lbl.grid(row = 0, column = 2, sticky = ('E'), padx = (20, 5))
-freq_lbl.configure(background = background_, foreground = foreground_)
+signal_frequency = IntVar()
+signal_frequency.set(10)
+signal_freq_box = Spinbox(modulation, from_ = 1, to = 100, textvariable = signal_frequency, font = font_, foreground = foreground_, command = signal_freq_change)
+signal_freq_box.grid(row = 0, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 21)
+signal_freq_box.bind('<Return>', signal_freq_change)
 
-frequency = IntVar()
-frequency.set(10)
-freq_box = Spinbox(modulation, from_ = 1, to = 100, textvariable = frequency, font = font_, foreground = foreground_, command = freq_change)
-freq_box.grid(row = 0, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 21)
-freq_box.bind('<Return>', freq_change)
 
-amp_lbl = ttk.Label(modulation, text = 'Amplitude', font = font_)
-amp_lbl.grid(row = 1, column = 2, sticky = ('W'), padx = (20, 5))
-amp_lbl.configure(background = background_, foreground = foreground_)
+#Signal Amplitude
+signal_amp_lbl = ttk.Label(modulation, text = 'Amplitude', font = font_)
+signal_amp_lbl.grid(row = 1, column = 2, sticky = ('W'), padx = (20, 5))
+signal_amp_lbl.configure(background = background_, foreground = foreground_)
 
-amplitude = IntVar()
-amplitude.set(80)
-ampl_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = amplitude, font = font_, command = amp_change, increment = 5.0)
-ampl_box.grid(row = 1, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 2)
-ampl_box.bind('<Return>', amp_change)
+signal_amplitude = IntVar()
+signal_amplitude.set(80)
+signal_ampl_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = signal_amplitude, font = font_, command = signal_amp_change, increment = 5.0)
+signal_ampl_box.grid(row = 1, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 2)
+signal_ampl_box.bind('<Return>', signal_amp_change)
 
-phase_lbl = ttk.Label(modulation, text = 'Фаза', font = font_)
-phase_lbl.grid(row = 2, column = 2, sticky = ('W'), padx = (70, 5))
-phase_lbl.configure(background = background_, foreground = foreground_)
 
-phase = IntVar()
-phase.set(0)
-phase_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = phase, font = font_, command = phase_change, increment = 10.0)
-phase_box.grid(row = 2, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 21)
-phase_box.bind('<Return>', phase_change)
+#Signal Phase
+signal_phase_lbl = ttk.Label(modulation, text = 'Фаза', font = font_)
+signal_phase_lbl.grid(row = 2, column = 2, sticky = ('W'), padx = (70, 5))
+signal_phase_lbl.configure(background = background_, foreground = foreground_)
 
+signal_phase = IntVar()
+signal_phase.set(0)
+signal_phase_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = signal_phase, font = font_, command = signal_phase_change, increment = 10.0)
+signal_phase_box.grid(row = 2, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 21)
+signal_phase_box.bind('<Return>', signal_phase_change)
+
+
+#Carrying frequency
+carry_freq_lbl = ttk.Label(modulation, text = 'Частота', font = font_)
+carry_freq_lbl.grid(row = 21, column = 2, sticky = ('E'), padx = (20, 5))
+carry_freq_lbl.configure(background = background_, foreground = foreground_)
+
+carry_frequency = IntVar()
+carry_frequency.set(10)
+carry_freq_box = Spinbox(modulation, from_ = 1, to = 100, textvariable = carry_frequency, font = font_, foreground = foreground_, command = carry_freq_change)
+carry_freq_box.grid(row = 21, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 21)
+carry_freq_box.bind('<Return>', carry_freq_change)
+
+
+#Carry Amplitude
+carry_amp_lbl = ttk.Label(modulation, text = 'Amplitude', font = font_)
+carry_amp_lbl.grid(row = 22, column = 2, sticky = ('W'), padx = (20, 5))
+carry_amp_lbl.configure(background = background_, foreground = foreground_)
+
+carry_amplitude = IntVar()
+carry_amplitude.set(80)
+carry_ampl_box = Spinbox(modulation, from_ = signal_amplitude.get(), to = 300, textvariable = carry_amplitude, font = font_, command = carry_amp_change, increment = 5.0)
+carry_ampl_box.grid(row = 22, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 2)
+carry_ampl_box.bind('<Return>', carry_amp_change)
+
+#Carry Phase
+carry_phase_lbl = ttk.Label(modulation, text = 'Фаза', font = font_)
+carry_phase_lbl.grid(row = 23, column = 2, sticky = ('W'), padx = (70, 5))
+carry_phase_lbl.configure(background = background_, foreground = foreground_)
+
+carry_phase = IntVar()
+carry_phase.set(0)
+carry_phase_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = carry_phase, font = font_, command = carry_phase_change, increment = 10.0)
+carry_phase_box.grid(row = 23, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 21)
+carry_phase_box.bind('<Return>', carry_phase_change)
+
+
+#Type of modulation switcher
 type_m_lbl = ttk.Label(modulation, text = 'Type', font = font_)
-type_m_lbl.grid(row = 3, column = 2, sticky = 'E', padx = (20, 5))
+type_m_lbl.grid(row = 6, column = 2, sticky = 'E', padx = (20, 5))
 type_m_lbl.configure(background = background_, foreground = foreground_)
 
 type_m = StringVar()
 type_modulation = ttk.Combobox(modulation, state = 'readonly', textvariable = type_m , font = font_)
-type_modulation.grid(row = 3, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 20)
+type_modulation.grid(row = 6, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 20)
 type_modulation['values'] = ('Амплитудная', 'Частотная', 'Фазовая')
 type_modulation.current(0)
 root.option_add('*TCombobox*Listbox.font', font_)
