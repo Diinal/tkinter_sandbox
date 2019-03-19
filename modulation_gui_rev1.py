@@ -72,7 +72,7 @@ signal_y_amplitude = 35 # height stretch
 signal_phi = 0
 #carrying osci
 carry_x_factor = 0.4 # width stretch
-carry_y_amplitude = 40 # height stretch
+carry_y_amplitude = 35 # height stretch
 carry_phi = 0
 #modulation
 #modulation_x_factor = 0.1 # width stretch
@@ -110,7 +110,7 @@ mod_frame = Canvas(plot_container, width = width, height = height, background= b
 mod_frame.grid(row = 41, column = 0, padx = 20, pady = 10)
 #line description
 mod_frame.create_text(80, 30, anchor=SW, text='промодулированное несущее колебание', font = font_, fill = foreground_)
-mod_frame.create_line(500, 18, 550, 18, width = 5, fill = 'green')
+mod_frame.create_line(500, 18, 550, 18, width = 5, fill = 'blue')
 mod_frame.create_text(570, 30, anchor=SW, text='форма сигнала', font = font_, fill = foreground_)
 mod_frame.create_line(730, 18, 770, 18, width = 5, fill = 'red')
 mod_frame.create_text(20, 30, anchor = SW, text = 'U(t)', font = font_, fill = foreground_)
@@ -154,23 +154,33 @@ def anim():
         try:
             signal_y = [int(math.sin((i+signal_frames + signal_phi) * signal_x_factor) * signal_y_amplitude) + center for i in x]
             signal_xy = list(zip(x, signal_y))
+            amp_coef = max(signal_y) - center
 
             #maybe this decision is note optimal
-            if carry_y_amplitude < signal_y_amplitude:
+            '''if carry_y_amplitude < signal_y_amplitude:
                 carry_y_amplitude = signal_y_amplitude
                 carry_amplitude.set(signal_y_amplitude)
+            '''
+            #temporary option, in future could change it for definite func
+            carry_y_amplitude = signal_y_amplitude
 
             carry_y = [int(math.sin((i+carry_frames + carry_phi) * carry_x_factor) * carry_y_amplitude) + center for i in x]
             carry_xy = list(zip(x, carry_y))
+            max_carry_amp = center - max(carry_y) 
 
-            mod_y = [int(math.sin((j+carry_frames + carry_phi) * carry_x_factor) * ((signal_y[i]) / carry_y[i]) * signal_y_amplitude + center+10) for i, j in enumerate(x)]
+            mod_y = [int(math.sin((j+carry_frames + carry_phi) * carry_x_factor)*((signal_y[i] - center * 1.5) / (amp_coef)) * carry_y_amplitude + center) for i, j in enumerate(x)]
             mod_xy = list(zip(x, mod_y))
+            mod_sig_y = [int(math.sin((i+signal_frames + signal_phi) * signal_x_factor) * signal_y_amplitude) + (center/2) for i in x]
+            mod_sig_xy = list(zip(x, mod_sig_y))
+
+            #print(max(carry_y)- center) === 39
             #print(min(signal_y), max(signal_y))
             #print(min(carry_y), max(carry_y))
 
             signal_sin_line = signal_frame.create_line(signal_xy, fill = 'red', width = 1)
             carry_sin_line = carry_frame.create_line(carry_xy, fill = 'blue', width = 1)
-            mod_sin_line = mod_frame.create_line(mod_xy, fill = 'green', width = 1)
+            mod_sin_line = mod_frame.create_line(mod_xy, fill = 'blue', width = 1)
+            mod_signal_sin_line = mod_frame.create_line(mod_sig_xy, fill = 'red', width =1)
 
             if signal_frames < ((1/signal_x_factor) * 1250): #(signal_x_factor * 1250): or freq = 10 === 63
                signal_frames += 1
@@ -195,6 +205,7 @@ def anim():
             signal_frame.delete(signal_sin_line)
             carry_frame.delete(carry_sin_line)
             mod_frame.delete(mod_sin_line)
+            mod_frame.delete(mod_signal_sin_line)
         except Exception as ex:
             print(type(ex).__name__, ex.args)
             sys.exit(0)
@@ -248,14 +259,14 @@ carry_freq_box.grid(row = 21, column = 3, sticky = ('N, W, E, S'), padx = 2, pad
 carry_freq_box.bind('<Return>', carry_freq_change)
 
 
-#Carry Amplitude
+#Carry Amplitude !!!disable spinbox and changed textvariable to signal amplitude!!!
 carry_amp_lbl = ttk.Label(modulation, text = 'Amplitude', font = font_)
 carry_amp_lbl.grid(row = 22, column = 2, sticky = ('W'), padx = (20, 5))
 carry_amp_lbl.configure(background = background_, foreground = foreground_)
 
 carry_amplitude = IntVar()
 carry_amplitude.set(40)
-carry_ampl_box = Spinbox(modulation, from_ = signal_amplitude.get(), to = 300, textvariable = carry_amplitude, font = font_, command = carry_amp_change, increment = 5.0)
+carry_ampl_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = signal_amplitude, font = font_, command = carry_amp_change, increment = 5.0, state = 'disable')
 carry_ampl_box.grid(row = 22, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 2)
 carry_ampl_box.bind('<Return>', carry_amp_change)
 
