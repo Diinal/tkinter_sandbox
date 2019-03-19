@@ -54,7 +54,7 @@ sin_line2 = c.create_line(xy1, fill = 'red')'''
 frame = 0
 while True:
     try:
-        y = [int(math.sin((i+frame) * x_factor) * y_amplitude) + center for i in x]
+        y = [int(math.sin((i+frame) * x_factor) * y_amplitude * .5) + center for i in x]
         xy = list(zip(x, y))
         sin_line = c.create_line(xy, fill = 'red', width = 1)
         if frame < 125:
