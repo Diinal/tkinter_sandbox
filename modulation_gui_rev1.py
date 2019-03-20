@@ -13,7 +13,9 @@ import time, sys, math
 #   7)add carrying oscillation +
 #   8) freeze animation button === signal/carrying _frames = 0 as a constant
 #   9)sinchronize carry_amplitude with signal_amplitude +
-#   10)add amplitude modulation
+#   10)add amplitude modulation +
+#   11)add combobox events and reconfigure constants architecture
+#   12)add freq modulation
 
 font_ = ('Arial', '14')
 background_ = '#f5f5f5'
@@ -164,11 +166,11 @@ def anim():
             #temporary option, in future could change it for definite func
             carry_y_amplitude = signal_y_amplitude
 
-            carry_y = [int(math.sin((i+carry_frames + carry_phi) * carry_x_factor) * carry_y_amplitude) + center for i in x]
+            carry_y = [int(math.sin((i+carry_frames + carry_phi) * carry_x_factor) * carry_y_amplitude * 2) + center for i in x]
             carry_xy = list(zip(x, carry_y))
             max_carry_amp = center - max(carry_y) 
 
-            mod_y = [int(math.sin((j+carry_frames + carry_phi) * carry_x_factor)*((signal_y[i] - center * 1.5) / (amp_coef)) * carry_y_amplitude + center) for i, j in enumerate(x)]
+            mod_y = [int(math.sin((j+carry_frames + carry_phi) * carry_x_factor)*((signal_y[i] - center * 1.5) / (amp_coef)) * max_carry_amp/2 + center) for i, j in enumerate(x)]
             mod_xy = list(zip(x, mod_y))
             mod_sig_y = [int(math.sin((i+signal_frames + signal_phi) * signal_x_factor) * signal_y_amplitude) + (center/2) for i in x]
             mod_sig_xy = list(zip(x, mod_sig_y))
@@ -230,7 +232,7 @@ signal_amp_lbl.configure(background = background_, foreground = foreground_)
 
 signal_amplitude = IntVar()
 signal_amplitude.set(35)
-signal_ampl_box = Spinbox(modulation, from_ = 0, to = 300, textvariable = signal_amplitude, font = font_, command = signal_amp_change, increment = 5.0)
+signal_ampl_box = Spinbox(modulation, from_ = 5, to = 300, textvariable = signal_amplitude, font = font_, command = signal_amp_change, increment = 5.0)
 signal_ampl_box.grid(row = 4, column = 3, sticky = ('N, W, E, S'), padx = 2, pady = 2)
 signal_ampl_box.bind('<Return>', signal_amp_change)
 
