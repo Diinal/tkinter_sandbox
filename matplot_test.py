@@ -6,6 +6,7 @@ import tkinter as Tk
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import time, gc
 #---------End of imports
 
 fig = plt.Figure()
@@ -13,8 +14,7 @@ fig = plt.Figure()
 x = np.arange(0, 10, 0.01)        # x-array
 
 def animate1(i):
-    line.set_ydata(np.sin(x+i/50.0))  # update the data 10.0
-    #line2.set_ydata(np.sin((x+i/50.0)*freq)*amp)
+    line.set_ydata(np.sin(x+i/50.0))
     return line,
 
 def animate2(i):
@@ -22,7 +22,7 @@ def animate2(i):
     return line2,
 
 def animate3(i):
-    y_signal = np.sin(x+i/50.0) + 1 #1 is previus y_max, it's need for up signal line
+    y_signal = np.sin(x+i/50.0)+1
     y_max = max(y_signal)
     y_carry = np.sin((x+i/50.0)*freq)*amp*(y_signal/y_max)
     line3.set_ydata(y_carry)
@@ -42,16 +42,16 @@ def normalize(ax):
 root = Tk.Tk()
 
 Tk.Label(root,text="SHM Simulation").grid(column=0, row=0)
-
-canvas = FigureCanvasTkAgg(fig, master=root)
-canvas.get_tk_widget().grid(column=0,row=1)
+frame = Tk.Frame(root)
+frame.grid(row = 1, column = 0)
+canvas = FigureCanvasTkAgg(fig, master=frame)
+canvas.get_tk_widget().grid(column=0,row=0)
 
 ax = fig.add_subplot(311)
 ax2 = fig.add_subplot(312)
 ax3 = fig.add_subplot(313)
-normalize(ax)
-normalize(ax2)
-normalize(ax3)
+root.update()
+
 freq = 10
 amp = 2
 line, = ax.plot(x, np.sin(x))
@@ -64,7 +64,16 @@ y_carry = np.sin(x*freq)*amp*(y_signal/y_max)
 line3, = ax3.plot(x, y_carry)
 line4, = ax3.plot(x, y_signal)
 
-ani1 = animation.FuncAnimation(fig, animate1, np.arange(1, 310), interval=20, blit=True)
-ani2 = animation.FuncAnimation(fig, animate2, np.arange(1, 32), interval=20, blit=True) #if speed = 10.0 => range = 125, interval =20
-ani3 = animation.FuncAnimation(fig, animate3, np.arange(1, 310), interval=20, blit=True)
+ax.cla()
+ax2.cla()
+ax3.cla()
+normalize(ax)
+normalize(ax2)
+normalize(ax3)
+
+ax.legend([line], ['san'])
+ani1 = animation.FuncAnimation(fig, animate1, np.arange(1, 312), interval=20, blit=True)
+ani2 = animation.FuncAnimation(fig, animate2, np.arange(1, 127), interval=20, blit=True) #if speed = 10.0 => range = 125, interval =20
+ani3 = animation.FuncAnimation(fig, animate3, np.arange(1, 312), interval=20, blit=True)
+
 Tk.mainloop()
