@@ -22,11 +22,10 @@ def animate2(i):
     return line2,
 
 def animate3(i):
-    y_signal = np.sin(x+i/50.0)+1
-    y_max = max(y_signal)
-    y_carry = np.sin((x+i/50.0)*freq)*amp*(y_signal/y_max)
+    y_signal = np.sin(x+i/50.0)
+    y_carry = np.sin((x+i/50.0)*freq + y_signal*5)*amp
     line3.set_ydata(y_carry)
-    line4.set_ydata(np.sin(x+i/50.0)+1)
+    line4.set_ydata(np.sin(x+i/50.0))
     return line3, line4,
 
 
@@ -59,8 +58,8 @@ max_signal_amp = max(np.sin(x))
 line2, = ax2.plot(x, np.sin(x*freq)*amp)
 
 y_max = max(np.sin(x)+1)
-y_signal = np.sin(x) + 1
-y_carry = np.sin(x*freq)*amp*(y_signal/y_max)
+y_signal = np.sin(x) 
+y_carry = np.sin(x*freq + y_signal*5)*amp
 line3, = ax3.plot(x, y_carry)
 line4, = ax3.plot(x, y_signal)
 

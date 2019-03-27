@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 freq = 0.1
 amp = 0.5
 x = np.arange(0, 100, 0.1)
-y_signal = np.sin(x*freq) *amp + 0.5
+y_signal = np.sin(x*freq) *amp +0.5
 
 y_max = max(y_signal)
 y_carry = np.sin(x)*(y_signal/y_max)
