@@ -86,6 +86,10 @@ def change_modulation(event=None):
         #deviation_input.grid(row = 7, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
         deviation_lbl.place(x = 1300, y = 900)
         deviation_input.place(x = 1425, y = 900)
+    elif type_modulation.current() == 2:
+        carry_amp_box.configure(state = 'normal')
+        deviation_lbl.place(x = 1300, y = 900)
+        deviation_input.place(x = 1425, y = 900)
 
 plot_container = tk.LabelFrame(root, text = 'Амплитудная модуляция', height = 960, width = 1280, font = font_)
 plot_container.grid(row = 0, column = 0, rowspan = 9, padx = 5, pady = 5)
@@ -124,7 +128,7 @@ carry_freq_lbl = ttk.Label(root, text = 'Частота', font = font_)
 carry_freq_lbl.grid(row = 3, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
 carry_freq = tk.IntVar()
 carry_freq.set(40)
-carry_freq_box = tk.Spinbox(root, from_ = 1, to = 100, textvariable = carry_freq, font = font_, foreground = foreground_, command = carry_freq_change, increment = 5.0)
+carry_freq_box = tk.Spinbox(root, from_ = 10, to = 100, textvariable = carry_freq, font = font_, foreground = foreground_, command = carry_freq_change, increment = 5.0)
 carry_freq_box.grid(row = 3, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
 carry_freq_box.bind('<Return>', carry_freq_change)
 
@@ -185,30 +189,43 @@ def c_ani(i):
     return c_line,
 
 def m_ani(i):
-    y_signal, y_carry = mod_ani(i)
+    y_signal, y_carry, label = calc_mod_ani(i)
     cm_line.set_ydata(y_carry)
     sm_line.set_ydata(y_signal)
-    return cm_line, sm_line,
+    subsignal_label.set_text(label)
+    return cm_line, sm_line, subsignal_label
 
-def mod_ani(i):
+def calc_mod_ani(i):
     if type_modulation.current() == 0:
         y_signal = np.sin((x+s_phs+i/50.0)*s_frq)*s_amp
         y_max = max(y_signal)
         y_signal = (np.sin((x+s_phs+i/50.0)*s_frq)*s_amp)+y_max
         y_max = max(y_signal)
         y_carry = np.sin((x+c_phs+i/50.0)*c_frq)*c_amp*(y_signal/y_max)
-        return y_signal, y_carry
+        label = 'Сигнал'
+        return y_signal, y_carry, label
 
     elif type_modulation.current() == 1:
         y_signal = np.sin((x+s_phs+i/50.0)*s_frq)*s_amp
         y_max = max(y_signal)
         #dev = 14/y_max
-        dev = 0
+        dev = 1
         if not deviation.get().isalpha() and deviation.get() != '':
             dev = float(deviation.get())
-        #y_carry = np.sin((x+c_phs+i/50.0)*c_frq + y_signal*dev)*c_amp
         y_carry = np.sin((x+c_phs+i/50.0)*c_frq - dev*np.cos((x+s_phs+i/50.0)*s_frq))*c_amp
-        return y_signal, y_carry
+        label = 'Сигнал'
+        return y_signal, y_carry, label
+
+    elif type_modulation.current() == 2:
+        dev = 0.1
+        y_signal = np.sin((x+s_phs+i/50.0)*s_frq)*s_amp
+        if not deviation.get().isalpha() and deviation.get() != '':
+            dev = float(deviation.get())
+        y_old_carry = np.sin((x+c_phs+i/50.0)*c_frq)*c_amp
+        y_carry = np.sin((x+c_phs+i/50.0)*c_frq - dev*y_signal)*c_amp
+        label = 'Несущее колебание'
+        return y_old_carry, y_carry, label
+        
 
 def normalize(ax):
     ax.set_xlim(0, 10)
@@ -240,7 +257,7 @@ y_signal = (np.sin((x+s_phs)*s_frq)*s_amp)+y_max
 y_max = max(y_signal)
 y_carry = y_carry*(y_signal/y_max)
 cm_line, = m_ax.plot(x, y_carry)
-sm_line, = m_ax.plot(x, y_signal, '--r')
+sm_line, = m_ax.plot(x, y_signal, 'r')
 
 s_ax.cla()
 c_ax.cla()
@@ -252,12 +269,11 @@ normalize(m_ax)
 
 s_ax.legend([s_line], ['Сигнал'], loc = 'upper center', frameon=False)
 c_ax.legend([c_line], ['Несущее колебание'], loc = 'upper center', frameon=False)
-m_ax.legend([sm_line, cm_line], ['Сигнал', 'Модулированное несущее колебание'], loc = 'upper center', frameon=False, ncol=2)
-
+m_ax.legend([cm_line, sm_line], ['Модулированное несущее колебание', ' '], loc = 'upper center', frameon=False, ncol=2)
+subsignal_label = m_ax.text(0.7, 0.90, '', transform=m_ax.transAxes)
 #c_repeatable_point = int(250 * c_frq / 10)
 
 a1 = animation.FuncAnimation(fig, s_ani, np.arange(1, 315), interval=20, blit=True)
 a2 = animation.FuncAnimation(fig, c_ani, np.arange(1, 127), interval=20, blit=True)
 a3 = animation.FuncAnimation(fig, m_ani, np.arange(1, 315), interval=20, blit=True)
-
 root.mainloop()
