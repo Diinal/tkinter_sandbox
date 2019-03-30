@@ -46,15 +46,14 @@ def signal_freq_change(event=None):
     s_frq = int(signal_freq.get())
 
 def signal_amp_change(event=None):
-    global s_amp, c_amp
+    global s_amp, c_amp, carry_amp
     s_amp = int(signal_amp.get())
     if type_modulation.current() == 0:
         carry_amp.set(s_amp*2)
         c_amp = s_amp*2
-
-def signal_phase_change(event=None):
-    global s_phs
-    s_phs = int(signal_phase.get())
+    elif type_modulation.current() == 1 or type_modulation.current() == 2:
+        carry_amp.set(s_amp)
+        c_amp = s_amp
 
 #carry
 def carry_freq_change(event=None):
@@ -65,29 +64,27 @@ def carry_amp_change(event=None):
     global c_amp
     c_amp = int(carry_amp.get())
 
-def carry_phase_change(event=None):
-    global c_phs
-    c_phs = int(carry_phase.get())
-
 
 def change_modulation(event=None):
     global deviation_lbl
     global deviation_input
+    global s_amp, c_amp, carry_amp
+
     if type_modulation.current() == 0:
+        carry_amp.set(s_amp*2)
+        c_amp = s_amp*2
         carry_amp_box.configure(state = 'disable' )
         #deviation_lbl.grid_remove()
         #deviation_input.grid_remove()
         deviation_lbl.place_forget()
         deviation_input.place_forget()
 
-    elif type_modulation.current() == 1:
-        carry_amp_box.configure(state = 'normal' )
+    elif type_modulation.current() == 1 or type_modulation.current() == 2:
+        carry_amp.set(s_amp)
+        c_amp = s_amp
+        carry_amp_box.configure(state = 'disable' )
         #deviation_lbl.grid(row = 7, column = 1, sticky = ('E'), padx = (40, 5), pady = 5)
         #deviation_input.grid(row = 7, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
-        deviation_lbl.place(x = 1300, y = 900)
-        deviation_input.place(x = 1425, y = 900)
-    elif type_modulation.current() == 2:
-        carry_amp_box.configure(state = 'normal')
         deviation_lbl.place(x = 1300, y = 900)
         deviation_input.place(x = 1425, y = 900)
 
@@ -113,15 +110,6 @@ signal_amp_box = tk.Spinbox(root, from_ = 5, to = 300, textvariable = signal_amp
 signal_amp_box.grid(row = 1, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
 signal_amp_box.bind('<Return>', func)
 
-#Signal phase
-signal_phase_lbl = ttk.Label(root, text = 'Фаза', font = font_)
-signal_phase_lbl.grid(row = 2, column = 1, sticky = ('E', 'N'), padx = (40, 5), pady = 5)
-signal_phase = tk.IntVar()
-signal_phase.set(0)
-signal_phase_box = tk.Spinbox(root, from_ = 0, to = 100, textvariable = signal_phase, font = font_, foreground = foreground_, command = signal_phase_change, increment = 5.0)
-signal_phase_box.grid(row = 2, column = 2, sticky = ('E', 'W', 'N'), padx = 2, pady = 5)
-signal_phase_box.bind('<Return>', func)
-
 
 #Carrying frequency
 carry_freq_lbl = ttk.Label(root, text = 'Частота', font = font_)
@@ -140,15 +128,6 @@ carry_amp.set(50)
 carry_amp_box = tk.Spinbox(root, from_ = 5, to = 300, textvariable = carry_amp, font = font_, foreground = foreground_, command = carry_amp_change, increment = 5.0, state = 'disable')
 carry_amp_box.grid(row = 4, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
 carry_amp_box.bind('<Return>', func)
-
-#Carrying phase
-carry_phase_lbl = ttk.Label(root, text = 'Фаза', font = font_)
-carry_phase_lbl.grid(row = 5, column = 1, sticky = ('E', 'N'), padx = (40, 5), pady = 5)
-carry_phase = tk.IntVar()
-carry_phase.set(0)
-carry_phase_box = tk.Spinbox(root, from_ = 0, to = 100, textvariable = carry_phase, font = font_, foreground = foreground_, command = carry_phase_change, increment = 5.0)
-carry_phase_box.grid(row = 5, column = 2, sticky = ('E', 'W', 'N'), padx = 2, pady = 5)
-carry_phase_box.bind('<Return>', func)
 
 
 #Type of modulation switcher
@@ -170,22 +149,24 @@ deviation_input = ttk.Entry(root, textvariable = deviation, font = font_)
 #variables
 s_frq = int(signal_freq.get())
 s_amp = int(signal_amp.get())
-s_phs = int(signal_phase.get())
 
 c_frq = int(carry_freq.get())
 c_amp = int(carry_amp.get())
-c_phs = int(carry_phase.get())
 
 #plotting
 fig = plt.Figure(figsize=(12, 10))
 x = np.arange(0, 10, 0.01)
 
 def s_ani(i):
-    s_line.set_ydata(np.sin((x+s_phs+i/50.0)*s_frq)*s_amp)
+    if type_modulation.current() != 0:
+        s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
+    else:
+        y_signal,_,__ = calc_mod_ani(i)
+        s_line.set_ydata(y_signal)
     return s_line,
 
 def c_ani(i):
-    c_line.set_ydata(np.sin((x+c_phs+i/50.0)*c_frq)*c_amp)
+    c_line.set_ydata(np.sin((x+i/50.0)*c_frq)*c_amp)
     return c_line,
 
 def m_ani(i):
@@ -193,36 +174,38 @@ def m_ani(i):
     cm_line.set_ydata(y_carry)
     sm_line.set_ydata(y_signal)
     subsignal_label.set_text(label)
+    if type_modulation.current() == 2:
+        sm_line.set_color('#1f77b4')
     return cm_line, sm_line, subsignal_label
 
 def calc_mod_ani(i):
     if type_modulation.current() == 0:
-        y_signal = np.sin((x+s_phs+i/50.0)*s_frq)*s_amp
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = max(y_signal)
-        y_signal = (np.sin((x+s_phs+i/50.0)*s_frq)*s_amp)+y_max
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
         y_max = max(y_signal)
-        y_carry = np.sin((x+c_phs+i/50.0)*c_frq)*c_amp*(y_signal/y_max)
+        y_carry = np.sin((x+i/50.0)*c_frq)*c_amp*(y_signal/y_max)
         label = 'Сигнал'
         return y_signal, y_carry, label
 
     elif type_modulation.current() == 1:
-        y_signal = np.sin((x+s_phs+i/50.0)*s_frq)*s_amp
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = max(y_signal)
         #dev = 14/y_max
         dev = 1
         if not deviation.get().isalpha() and deviation.get() != '':
             dev = float(deviation.get())
-        y_carry = np.sin((x+c_phs+i/50.0)*c_frq - dev*np.cos((x+s_phs+i/50.0)*s_frq))*c_amp
+        y_carry = np.sin((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq))*c_amp
         label = 'Сигнал'
         return y_signal, y_carry, label
 
     elif type_modulation.current() == 2:
         dev = 0.1
-        y_signal = np.sin((x+s_phs+i/50.0)*s_frq)*s_amp
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         if not deviation.get().isalpha() and deviation.get() != '':
             dev = float(deviation.get())
-        y_old_carry = np.sin((x+c_phs+i/50.0)*c_frq)*c_amp
-        y_carry = np.sin((x+c_phs+i/50.0)*c_frq - dev*y_signal)*c_amp
+        y_old_carry = np.sin((x+i/50.0)*c_frq)*c_amp
+        y_carry = np.sin((x+i/50.0)*c_frq - dev*y_signal)*c_amp
         label = 'Несущее колебание'
         return y_old_carry, y_carry, label
         
@@ -247,16 +230,16 @@ c_ax = fig.add_subplot(312)
 m_ax = fig.add_subplot(313)
 root.update()
 
-y_signal = np.sin((x+s_phs)*s_frq)*s_amp
+y_signal = np.sin((x)*s_frq)*s_amp
 y_max = max(y_signal)
-y_carry = np.sin((x+c_phs)*c_frq)*c_amp
+y_carry = np.sin((x)*c_frq)*c_amp
 s_line, = s_ax.plot(x, y_signal, 'r')
 c_line, = c_ax.plot(x, y_carry)
 
-y_signal = (np.sin((x+s_phs)*s_frq)*s_amp)+y_max
+y_signal = (np.sin((x)*s_frq)*s_amp)+y_max
 y_max = max(y_signal)
 y_carry = y_carry*(y_signal/y_max)
-cm_line, = m_ax.plot(x, y_carry)
+cm_line, = m_ax.plot(x, y_carry, 'g')
 sm_line, = m_ax.plot(x, y_signal, 'r')
 
 s_ax.cla()
