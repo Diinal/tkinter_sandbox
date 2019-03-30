@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from scipy import signal
 
 #TODO
 # create new gui without notebook with embeded matplotlib+
@@ -51,7 +52,7 @@ def signal_amp_change(event=None):
     if type_modulation.current() == 0:
         carry_amp.set(s_amp*2)
         c_amp = s_amp*2
-    elif type_modulation.current() == 1 or type_modulation.current() == 2:
+    elif type_modulation.current() >= 2:
         carry_amp.set(s_amp)
         c_amp = s_amp
 
@@ -63,6 +64,10 @@ def carry_freq_change(event=None):
 def carry_amp_change(event=None):
     global c_amp
     c_amp = int(carry_amp.get())
+
+def carry_width_change(event = None):
+    global c_width
+    c_width = int(carry_width.get())/100
 
 
 def change_modulation(event=None):
@@ -85,8 +90,16 @@ def change_modulation(event=None):
         carry_amp_box.configure(state = 'disable' )
         #deviation_lbl.grid(row = 7, column = 1, sticky = ('E'), padx = (40, 5), pady = 5)
         #deviation_input.grid(row = 7, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
-        deviation_lbl.place(x = 1300, y = 900)
+        deviation_lbl.place(x = 1310, y = 900)
         deviation_input.place(x = 1425, y = 900)
+
+    elif type_modulation.current() == 3 or type_modulation.current() == 4:
+        carry_amp.set(s_amp)
+        c_amp = s_amp
+        carry_amp_box.configure(state = 'disable' )
+        carry_width_lbl.place(x = 1335, y = 625)
+        carry_width_box.place(x = 1425, y = 625)
+
 
 plot_container = tk.LabelFrame(root, text = 'Амплитудная модуляция', height = 960, width = 1280, font = font_)
 plot_container.grid(row = 0, column = 0, rowspan = 9, padx = 5, pady = 5)
@@ -129,6 +142,11 @@ carry_amp_box = tk.Spinbox(root, from_ = 5, to = 300, textvariable = carry_amp, 
 carry_amp_box.grid(row = 4, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
 carry_amp_box.bind('<Return>', func)
 
+#Carrying impulse width
+carry_width_lbl = ttk.Label(root, text = 'Ширина', font = font_)
+carry_width = tk.IntVar()
+carry_width_box = tk.Spinbox(root, from_ = 1, to = 100, textvariable = carry_width, font = font_, foreground = foreground_, command = carry_width_change, increment = 5.0)
+carry_width.set(50)
 
 #Type of modulation switcher
 type_m_lbl = ttk.Label(root, text = 'Тип модуляции:', font = font_)
@@ -136,7 +154,7 @@ type_m_lbl.grid(row = 6, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady =
 type_m = tk.StringVar()
 type_modulation = ttk.Combobox(root, state = 'readonly', textvariable = type_m , font = font_)
 type_modulation.grid(row = 6, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
-type_modulation['values'] = ('Амплитудная', 'Частотная', 'Фазовая')
+type_modulation['values'] = ('Амплитудная', 'Частотная', 'Фазовая', 'АИМ 1 рода', 'АИМ 2 рода')
 type_modulation.current(0)
 root.option_add('*TCombobox*Listbox.font', font_)
 type_modulation.bind('<<ComboboxSelected>>', change_modulation)
@@ -152,6 +170,7 @@ s_amp = int(signal_amp.get())
 
 c_frq = int(carry_freq.get())
 c_amp = int(carry_amp.get())
+c_width = int(carry_width.get())/100
 
 #plotting
 fig = plt.Figure(figsize=(12, 10))
@@ -166,7 +185,12 @@ def s_ani(i):
     return s_line,
 
 def c_ani(i):
-    c_line.set_ydata(np.sin((x+i/50.0)*c_frq)*c_amp)
+    if type_modulation.current() <= 2:
+        c_line.set_ydata(np.sin((x+i/50.0)*c_frq)*c_amp)
+    else:
+        y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp
+        y_max = max(y_carry)
+        c_line.set_ydata(y_carry+y_max)
     return c_line,
 
 def m_ani(i):
@@ -208,7 +232,17 @@ def calc_mod_ani(i):
         y_carry = np.sin((x+i/50.0)*c_frq - dev*y_signal)*c_amp
         label = 'Несущее колебание'
         return y_old_carry, y_carry, label
-        
+
+    elif type_modulation.current() == 3:
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
+        y_max = max(y_signal)
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
+        y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp
+        y_max = max(y_carry)
+        y_carry = y_carry + y_max
+        y_carry = y_signal*y_carry/(y_max*2)
+        label = 'Сигнал'
+        return y_signal, y_carry, label
 
 def normalize(ax):
     ax.set_xlim(0, 10)

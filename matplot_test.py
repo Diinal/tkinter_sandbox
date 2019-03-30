@@ -6,6 +6,7 @@ import tkinter as Tk
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from scipy import signal
 import time, gc
 #---------End of imports
 
@@ -14,18 +15,20 @@ fig = plt.Figure()
 x = np.arange(0, 10, 0.01)        # x-array
 
 def animate1(i):
-    line.set_ydata(np.sin(x+i/50.0))
+    line.set_ydata(np.sin(x+i/50.0)+1)
     return line,
 
 def animate2(i):
-    line2.set_ydata(np.sin((x+i/50.0)*freq)*amp)
+    #line2.set_ydata(np.sin((x+i/50.0)*freq)*amp)prev = 0
+    y_carry = signal.square((x+i/50.0)*freq)*amp
+    line2.set_ydata(y_carry)
     return line2,
 
 def animate3(i):
-    y_signal = np.sin(x+i/50.0)
-    y_carry = np.sin((x+i/50.0)*freq + y_signal*5)*amp
+    y_signal = np.sin(x+i/50.0) + 1
+    y_carry = y_signal*signal.square((x+i/50.0)*freq)
     line3.set_ydata(y_carry)
-    line4.set_ydata(np.sin(x+i/50.0))
+    line4.set_ydata(np.sin(x+i/50.0)+1)
     return line3, line4,
 
 
