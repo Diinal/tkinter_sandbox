@@ -13,7 +13,7 @@ x = np.arange(0, 10, 0.01)
 y_signal = np.sin(x*freq) *amp +1
 y_max = max(y_signal)
 
-y_carry = signal.square(10 * np.pi * 0.5 * x, duty=0.8) + 1
+y_carry = signal.square(10 * np.pi * 0.5 * x, duty=0.5) + 1
 
 
 fig = plt.figure()
@@ -37,6 +37,7 @@ line, = ax.plot(x, y_signal)
 line1, = ax2.plot(x, y_carry)
 line2, = ax3.plot(x, y_signal)
 
-line3, = ax3.plot(x, y_carry*(y_signal/y_max))
+line3, = ax3.plot(x, signal.square(10 * np.pi * 0.5 * x, duty=(y_signal)*.5) + 1)
+
 
 plt.show()

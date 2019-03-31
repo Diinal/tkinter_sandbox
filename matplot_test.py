@@ -26,11 +26,27 @@ def animate2(i):
 
 def animate3(i):
     y_signal = np.sin(x+i/50.0) + 1
-    y_carry = y_signal*signal.square((x+i/50.0)*freq)
+    y_carry = signal.square((x+i/50.0)*freq, duty=y_signal*.5) +1
     line3.set_ydata(y_carry)
+   # line3.set_ydata(y_carry)
     line4.set_ydata(np.sin(x+i/50.0)+1)
     return line3, line4,
 
+def average(y_mod):
+    s, counter, prev = 0, 0, 0
+    flag = False
+    for i, a in enumerate(y_mod):
+        if a > 0:
+            flag = True
+            s += a
+            counter += 1
+        else:
+            if flag:
+                y_mod[prev:i] = s/counter
+                s, counter = 0, 0
+                flag = False
+            prev = i+1 
+    return y_mod
 
 def normalize(ax):
     ax.set_xlim(0, 10)
