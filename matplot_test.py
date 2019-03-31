@@ -15,7 +15,20 @@ fig = plt.Figure()
 x = np.arange(0, 10, 0.01)        # x-array
 
 def animate1(i):
-    line.set_ydata(np.sin(x+i/50.0)+1)
+    #inc = int(i/1.5712)
+    inc = i/10
+    inc2 = int(10*i/np.pi)
+    if 300-inc2 < -1000:
+        inc2 -= 2000
+    if 300-inc2 > 0:
+        y_signal = signal.square((np.pi*x+inc + 0 )*1) + 1
+        y_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + np.pi)*1) + 1
+    else:
+        y_signal = signal.square((np.pi*x+inc + np.pi )*1) + 1
+        y_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*1) + 1
+    #line.set_ydata(np.sin(x+i/50.0)+1)
+    line.set_ydata(y_signal)
+    print(i, 300-inc2)
     return line,
 
 def animate2(i):
@@ -89,8 +102,9 @@ normalize(ax)
 normalize(ax2)
 normalize(ax3)
 
-ax.legend([line], ['san'])
-ani1 = animation.FuncAnimation(fig, animate1, np.arange(1, 312), interval=20, blit=True)
+#ax.legend([line], ['san'])
+ax.xaxis.set_major_locator(plt.MaxNLocator(20))
+ani1 = animation.FuncAnimation(fig, animate1, np.arange(1, 629), interval=20, blit=True)
 ani2 = animation.FuncAnimation(fig, animate2, np.arange(1, 127), interval=20, blit=True) #if speed = 10.0 => range = 125, interval =20
 ani3 = animation.FuncAnimation(fig, animate3, np.arange(1, 312), interval=20, blit=True)
 

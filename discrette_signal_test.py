@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from scipy import signal
+import random
 
 freq = 1
 amp = 1
@@ -10,10 +11,20 @@ carry_amp = 1
 x = np.arange(0, 10, 0.01)
 
 #аналоговый сигнал
-y_signal = signal.square(5 * np.pi *x, duty = 0.5) + 1
-y_max = max(y_signal)
+y_signal = np.sin(x*freq) *amp +1
+#дискретный сигнал
+'''y_signal = signal.square(1 *np.pi *x) + 1
+y_signal[300:400] = 2
+y_signal[400:] = signal.square(1 *np.pi *x[400:] +np.pi) +1
+y_signal[700:800] = 0
+y_signal[800:] = signal.square(1 *np.pi *x[800:]) +1'''
+y_signal = signal.square(1 *np.pi *x) + 1
+y_signal[300:] = 2
+y_signal[400:] = signal.square(1 *np.pi *x[400:] +np.pi) +1
+y_signal[700:] = 0
+y_signal[800:] = signal.square(1 *np.pi *x[800:]) +1
 
-y_carry = 2*np.sin(2*np.pi*x)
+y_carry = 2*np.sin(8*np.pi*x)
 
 
 fig = plt.figure()
@@ -37,7 +48,7 @@ line, = ax.plot(x, y_signal)
 line1, = ax2.plot(x, y_carry)
 line2, = ax3.plot(x, y_signal)
 
-line3, = ax3.plot(x, signal.square(10 * np.pi * 0.5 * x, duty=(y_signal)*.5) + 1)
+line3, = ax3.plot(x, y_carry*y_signal/2)
 
 
 plt.show()
