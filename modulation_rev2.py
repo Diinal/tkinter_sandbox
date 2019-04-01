@@ -97,7 +97,7 @@ def change_modulation(event=None):
         carry_width_lbl.place_forget()
         carry_width_box.place_forget()
 
-    elif type_modulation.current() >= 3:
+    elif type_modulation.current() >= 3 and type_modulation.current() < 6:
         carry_amp.set(s_amp)
         c_amp = s_amp
         carry_amp_box.configure(state = 'disable' )
@@ -105,6 +105,17 @@ def change_modulation(event=None):
         deviation_input.place_forget()
         carry_width_lbl.place(x = 1280, y = 625)
         carry_width_box.place(x = 1380, y = 625)
+    
+    elif type_modulation.current() >= 6:
+        carry_amp.set(s_amp)
+        c_amp = s_amp
+        carry_amp_box.configure(state = 'disable' )
+        deviation_lbl.place_forget()
+        deviation_input.place_forget()
+        carry_width_lbl.place(x = 1280, y = 625)
+        carry_width_box.place(x = 1380, y = 625)
+        deviation_lbl.place(x = 1270, y = 900)
+        deviation_input.place(x = 1380, y = 900)
 
 
 plot_container = tk.LabelFrame(root, text = 'Амплитудная модуляция', height = 960, width = 1280, font = font_)
@@ -183,11 +194,12 @@ fig = plt.Figure(figsize=(12, 10))
 x = np.arange(0, 10, 0.01)
 
 def s_ani(i):
-    if type_modulation.current() != 0:
+    if type_modulation.current() != 0 and type_modulation.current() <= 3:
         s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
     else:
         y_signal,_,__ = calc_mod_ani(i)
         s_line.set_ydata(y_signal)
+        s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
     return s_line,
 
 def c_ani(i):
@@ -268,6 +280,31 @@ def calc_mod_ani(i):
         y_max = s_amp#max(y_signal)
         y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width*y_signal/(y_max*2))*c_amp+ y_max
+        label = 'Сигнал'
+        return y_signal, y_carry, label
+    
+    #PPM not work correctly (mb link ppm coords to pwm but also add a deviation to pwm)
+    elif type_modulation.current() == 6:
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
+        y_max = s_amp#max(y_signal)
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
+        y_old_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+ y_max
+        dev = 0.1
+        if not deviation.get().isalpha() and deviation.get() != '':
+            dev = float(deviation.get())
+        y_carry = signal.square((x+i/50.0)*c_frq - dev*np.sin((x+i/50.0)*s_frq), duty=c_width)*c_amp+ y_max
+        label = 'Несущее колебание'
+        return y_old_carry, y_carry, label
+
+    #PFM not work correctly
+    elif type_modulation.current() == 7:
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
+        y_max = s_amp#max(y_signal)
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
+        dev = 10
+        if not deviation.get().isalpha() and deviation.get() != '':
+            dev = float(deviation.get())
+        y_carry = signal.square((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq), duty=c_width)*c_amp+ y_max #c_width + 0.4*(y_signal-y_max)/(y_max)
         label = 'Сигнал'
         return y_signal, y_carry, label
 

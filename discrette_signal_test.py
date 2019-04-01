@@ -48,7 +48,8 @@ line, = ax.plot(x, y_signal)
 line1, = ax2.plot(x, y_carry)
 line2, = ax3.plot(x, y_signal)
 
-line3, = ax3.plot(x, y_carry*y_signal/2)
-
+y_carry = 2*np.sin(4*np.pi*x * (y_signal+1))
+#line3, = ax3.plot(x, y_carry*y_signal/2)
+line3, = ax3.plot(x, y_carry)
 
 plt.show()
