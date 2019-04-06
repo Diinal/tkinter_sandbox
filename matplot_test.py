@@ -32,14 +32,15 @@ def animate1(i):
     return line,
 
 def animate2(i):
-    #line2.set_ydata(np.sin((x+i/50.0)*freq)*amp)prev = 0
-    y_carry = signal.square((x+i/50.0)*freq)*amp
+    inc = i/30
+    #line2.set_ydata(np.sin((x+i/50.0)*c_frq)*c_amp)prev = 0
+    y_carry = np.sin((x+inc)*c_frq)*c_amp
     line2.set_ydata(y_carry)
     return line2,
 
 def animate3(i):
     y_signal = np.sin(x+i/50.0) + 1
-    y_carry = signal.square((x+i/50.0)*freq, duty=y_signal*.5) +1
+    y_carry = signal.square((x+i/50.0)*c_frq, duty=y_signal*.5) +1
     line3.set_ydata(y_carry)
    # line3.set_ydata(y_carry)
     line4.set_ydata(np.sin(x+i/50.0)+1)
@@ -83,15 +84,15 @@ ax2 = fig.add_subplot(312)
 ax3 = fig.add_subplot(313)
 root.update()
 
-freq = 10
-amp = 2
+c_frq = 10
+c_amp = 1
 line, = ax.plot(x, np.sin(x))
 max_signal_amp = max(np.sin(x))
-line2, = ax2.plot(x, np.sin(x*freq)*amp)
+line2, = ax2.plot(x, np.sin(x*c_frq)*c_amp)
 
 y_max = max(np.sin(x)+1)
 y_signal = np.sin(x) 
-y_carry = np.sin(x*freq + y_signal*5)*amp
+y_carry = np.sin(x*c_frq + y_signal*5)*c_amp
 line3, = ax3.plot(x, y_carry)
 line4, = ax3.plot(x, y_signal)
 

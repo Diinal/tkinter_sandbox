@@ -122,7 +122,7 @@ def change_modulation(event=None):
         deviation_input.place(x = 1380, y = 900)
 
 
-plot_container = tk.LabelFrame(root, text = 'Амплитудная модуляция', height = 960, width = 1280, font = font_)
+plot_container = tk.LabelFrame(root, text = 'Модуляция', height = 960, width = 1280, font = font_)
 plot_container.grid(row = 0, column = 0, rowspan = 9, padx = 5, pady = 5)
 plot_container.configure(background = background_, foreground = foreground_)
 
@@ -298,7 +298,7 @@ def calc_mod_ani(i):
     #PPM
     elif type_modulation.current() == 6:
         inc = i/50
-        inc2 = int(1*i/np.pi)
+        #inc2 = int(1*i/np.pi)
 
         y_max = s_amp
 
@@ -324,7 +324,7 @@ def calc_mod_ani(i):
     #PFM
     elif type_modulation.current() == 7:
         inc = i/50
-        inc2 = int(1*i/np.pi)
+        #inc2 = int(1*i/np.pi)
 
         y_max = s_amp
 
