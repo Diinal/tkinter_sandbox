@@ -85,6 +85,7 @@ def change_modulation(event=None):
         deviation_input.place_forget()
         carry_width_lbl.place_forget()
         carry_width_box.place_forget()
+        carry_width_percent_lbl.place_forget()
 
     elif type_modulation.current() == 1 or type_modulation.current() == 2:
         carry_amp.set(s_amp)
@@ -96,6 +97,7 @@ def change_modulation(event=None):
         deviation_input.place(x = 1380, y = 900)
         carry_width_lbl.place_forget()
         carry_width_box.place_forget()
+        carry_width_percent_lbl.place_forget()
 
     elif type_modulation.current() >= 3 and type_modulation.current() < 6:
         carry_amp.set(s_amp)
@@ -105,6 +107,7 @@ def change_modulation(event=None):
         deviation_input.place_forget()
         carry_width_lbl.place(x = 1280, y = 625)
         carry_width_box.place(x = 1380, y = 625)
+        carry_width_percent_lbl.place(x = 1480, y = 625)
     
     elif type_modulation.current() >= 6:
         carry_amp.set(s_amp)
@@ -114,6 +117,7 @@ def change_modulation(event=None):
         deviation_input.place_forget()
         carry_width_lbl.place(x = 1280, y = 625)
         carry_width_box.place(x = 1380, y = 625)
+        carry_width_percent_lbl.place(x = 1480, y = 625)
         deviation_lbl.place(x = 1270, y = 900)
         deviation_input.place(x = 1380, y = 900)
 
@@ -161,8 +165,9 @@ carry_amp_box.bind('<Return>', func)
 
 #Carrying impulse width
 carry_width_lbl = ttk.Label(root, text = 'Ширина', font = font_)
+carry_width_percent_lbl = ttk.Label(root, text = '%', font = font_)
 carry_width = tk.IntVar()
-carry_width_box = tk.Spinbox(root, from_ = 1, to = 100, textvariable = carry_width, font = font_, foreground = foreground_, command = carry_width_change, increment = 5.0)
+carry_width_box = tk.Spinbox(root, from_ = 1, to = 100, textvariable = carry_width, font = font_, foreground = foreground_, command = carry_width_change, increment = 5.0, width = 5)
 carry_width.set(50)
 
 #Type of modulation switcher
@@ -194,7 +199,7 @@ fig = plt.Figure(figsize=(12, 10))
 x = np.arange(0, 10, 0.01)
 
 def s_ani(i):
-    if type_modulation.current() != 0 and type_modulation.current() <= 3:
+    if type_modulation.current() != 0 and type_modulation.current() < 3:
         s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
     else:
         y_signal,_,__ = calc_mod_ani(i)
@@ -215,10 +220,14 @@ def m_ani(i):
     y_signal, y_carry, label = calc_mod_ani(i)
     cm_line.set_ydata(y_carry)
     sm_line.set_ydata(y_signal)
-    subsignal_label.set_text(label)
+    sm_line.set_color('k')
+    spm_line.set_ydata(0)
     if type_modulation.current() == 2:
+        spm_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
+    subsignal_label.set_text(label)
+    if type_modulation.current() == 2 or type_modulation.current() == 6:
         sm_line.set_color('#1f77b4')
-    return cm_line, sm_line, subsignal_label
+    return cm_line, sm_line, spm_line, subsignal_label
 
 def calc_mod_ani(i):
     #AM
@@ -251,7 +260,8 @@ def calc_mod_ani(i):
             dev = float(deviation.get())
         y_old_carry = np.sin((x+i/50.0)*c_frq)*c_amp
         y_carry = np.sin((x+i/50.0)*c_frq - dev*y_signal)*c_amp
-        label = 'Несущее колебание'
+        #label = 'Несущее колебание'
+        label = 'Сигнал'
         return y_old_carry, y_carry, label
 
     #PAM_1
@@ -279,11 +289,11 @@ def calc_mod_ani(i):
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = s_amp#max(y_signal)
         y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
-        y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width*y_signal/(y_max*2))*c_amp+ y_max
+        y_carry = signal.square((x+i/50.0)*c_frq, duty=1.5*c_width*y_signal/(y_max*2)+0.08)*c_amp+ y_max
         label = 'Сигнал'
         return y_signal, y_carry, label
     
-    #PPM not work correctly (mb link ppm coords to pwm but also add a deviation to pwm)
+    #PPM not work correctly 
     elif type_modulation.current() == 6:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = s_amp#max(y_signal)
@@ -293,19 +303,35 @@ def calc_mod_ani(i):
         if not deviation.get().isalpha() and deviation.get() != '':
             dev = float(deviation.get())
         y_carry = signal.square((x+i/50.0)*c_frq - dev*np.sin((x+i/50.0)*s_frq), duty=c_width)*c_amp+ y_max
+        
         label = 'Несущее колебание'
         return y_old_carry, y_carry, label
 
-    #PFM not work correctly
+    #PFM not work correctly (mb link ppm coords to pwm but also add a deviation to pwm)
     elif type_modulation.current() == 7:
-        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
+        inc = i/50
+        inc2 = int(1*i/np.pi)
+        #y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = s_amp#max(y_signal)
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
-        dev = 10
+        y_signal_changed = (np.sin((x+inc + np.pi/3)*s_frq)*s_amp)+y_max
+        '''dev = 10
         if not deviation.get().isalpha() and deviation.get() != '':
             dev = float(deviation.get())
-        y_carry = signal.square((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq), duty=c_width)*c_amp+ y_max #c_width + 0.4*(y_signal-y_max)/(y_max)
+        y_carry = signal.square((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq), duty=c_width)*c_amp+ y_max''' #c_width + 0.4*(y_signal-y_max)/(y_max)
+        y_pwm = signal.square((x+inc)*c_frq, duty=1.5*c_width*y_signal_changed/(y_max*2) + 0.08)*c_amp+ y_max
+
+        y_carry = np.sin(x)
+        y_carry[:] = 0
+
+        m_width = int(np.pi*200 *c_width/c_frq)
+        prev = 0
+        for i, a in enumerate(y_pwm):
+            if a == 0 and prev == 2*y_max:
+                y_carry[i:i +m_width] = 2*y_max
+            prev = a
+        y_signal = (np.sin((x+inc)*s_frq)*s_amp)+y_max
         label = 'Сигнал'
+        #y_carry = y_pwm
         return y_signal, y_carry, label
 
 def average(y_mod):
@@ -347,14 +373,15 @@ root.update()
 y_signal = np.sin((x)*s_frq)*s_amp
 y_max = max(y_signal)
 y_carry = np.sin((x)*c_frq)*c_amp
-s_line, = s_ax.plot(x, y_signal, 'r')
+s_line, = s_ax.plot(x, y_signal, 'k')
 c_line, = c_ax.plot(x, y_carry)
 
 y_signal = (np.sin((x)*s_frq)*s_amp)+y_max
 y_max = max(y_signal)
 y_carry = y_carry*(y_signal/y_max)
-cm_line, = m_ax.plot(x, y_carry, 'g')
-sm_line, = m_ax.plot(x, y_signal, 'r')
+cm_line, = m_ax.plot(x, y_carry, 'r')
+spm_line, = m_ax.plot(x, y_signal, 'k')
+sm_line, = m_ax.plot(x, y_signal, 'k')
 
 s_ax.cla()
 c_ax.cla()
