@@ -14,10 +14,10 @@ fig = plt.Figure()
 
 x = np.arange(0, 10, 0.01)        # x-array
 
-def animate1(i):
+def disc_s_gen(i):
     #inc = int(i/1.5712)
-    inc = i/10
-    inc2 = int(10*i/np.pi)
+    inc = i/20
+    inc2 = int(5*i/np.pi)
     if 300-inc2 < -1000:
         inc2 -= 2000
     if 300-inc2 > 0:
@@ -26,24 +26,28 @@ def animate1(i):
     else:
         y_signal = signal.square((np.pi*x+inc + np.pi )*1) + 1
         y_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*1) + 1
-    #line.set_ydata(np.sin(x+i/50.0)+1)
+    return y_signal
+
+def animate1(i):
+    y_signal = disc_s_gen(i)
     line.set_ydata(y_signal)
-    print(i, 300-inc2)
     return line,
 
 def animate2(i):
-    inc = i/30
+    inc = i/10
     #line2.set_ydata(np.sin((x+i/50.0)*c_frq)*c_amp)prev = 0
-    y_carry = np.sin((x+inc)*c_frq)*c_amp
+    y_carry = np.sin((np.pi*x+inc)*c_frq)*c_amp
     line2.set_ydata(y_carry)
     return line2,
 
 def animate3(i):
-    y_signal = np.sin(x+i/50.0) + 1
-    y_carry = signal.square((x+i/50.0)*c_frq, duty=y_signal*.5) +1
+    inc = i/10
+    inc2 = int(10*i/np.pi)
+    y_signal = disc_s_gen(i)
+    y_carry = np.sin((np.pi*x+inc)*c_frq)*c_amp*(y_signal/2)
     line3.set_ydata(y_carry)
    # line3.set_ydata(y_carry)
-    line4.set_ydata(np.sin(x+i/50.0)+1)
+    line4.set_ydata(y_signal)
     return line3, line4,
 
 def average(y_mod):
@@ -84,8 +88,8 @@ ax2 = fig.add_subplot(312)
 ax3 = fig.add_subplot(313)
 root.update()
 
-c_frq = 10
-c_amp = 1
+c_frq = 2
+c_amp = 2
 line, = ax.plot(x, np.sin(x))
 max_signal_amp = max(np.sin(x))
 line2, = ax2.plot(x, np.sin(x*c_frq)*c_amp)
@@ -107,6 +111,6 @@ normalize(ax3)
 ax.xaxis.set_major_locator(plt.MaxNLocator(20))
 ani1 = animation.FuncAnimation(fig, animate1, np.arange(1, 629), interval=20, blit=True)
 ani2 = animation.FuncAnimation(fig, animate2, np.arange(1, 127), interval=20, blit=True) #if speed = 10.0 => range = 125, interval =20
-ani3 = animation.FuncAnimation(fig, animate3, np.arange(1, 312), interval=20, blit=True)
+ani3 = animation.FuncAnimation(fig, animate3, np.arange(1, 629), interval=20, blit=True)
 
 Tk.mainloop()

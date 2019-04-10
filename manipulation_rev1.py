@@ -113,8 +113,9 @@ x = np.arange(0, 10, 0.01)
 
 def discr_signal_gen(i):
     #inc = int(i/1.5712)
-    inc = i/10
-    inc2 = int(10*i/np.pi)
+    inc = i/20
+    inc2 = int(5*i/np.pi)
+    #inc2 = int(2*i)
     if 300-inc2 < -1000:
         inc2 -= 2000
     if 300-inc2 > 0:
@@ -123,6 +124,20 @@ def discr_signal_gen(i):
     else:
         y_signal = signal.square((np.pi*x+inc + np.pi )*1)*s_amp + s_amp
         y_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*1)*s_amp + s_amp
+    '''position = 949 #629
+    s_frq = 5
+    phi = 0
+    if position-inc2 < -1000:
+        inc2 -= 2000
+    if i == 815:
+        phi = -10
+    if position-inc2 > 0:
+        y_signal = signal.square((np.pi*x+inc)*s_frq)*s_amp + s_amp
+        y_signal[position-inc2:] = signal.square((x[position-inc2:]+inc + np.pi)*s_frq)*s_amp + s_amp
+    else:
+        y_signal = signal.square((x+inc + np.pi)*s_frq)*s_amp + s_amp
+        y_signal[position-inc2:] = signal.square((x[position-inc2:]+inc - 4.9)*s_frq)*s_amp + s_amp'''
+    #print(i, 300-inc2)
     return y_signal
 
 def s_ani(i):
@@ -131,8 +146,9 @@ def s_ani(i):
     return s_line,
 
 def c_ani(i):
-    inc = i/32
-    c_line.set_ydata(np.sin((x+inc)*c_frq)*c_amp)
+    inc = i/(10*np.pi)
+    inc = i/20
+    c_line.set_ydata(np.sin((np.pi*x+inc)*c_frq/2)*c_amp)
     return c_line,
 
 def m_ani(i):
@@ -143,15 +159,23 @@ def m_ani(i):
 
 def calc_mod_ani(i):
     inc = i/(10*np.pi)
-
+    inc = i/20
     #ASK
     if type_manipulation.current() == 0:
         y_signal = discr_signal_gen(i)
-        y_carry = np.sin((x+inc)*c_frq)*c_amp*(y_signal/(2*s_amp))
+        y_carry = np.sin((np.pi*x+inc)*c_frq/2)*c_amp*(y_signal/(2*s_amp))
         return y_signal, y_carry
 
     #FSK
+    if type_manipulation.current() == 1:
+        y_signal = discr_signal_gen(i)
+        y_carry = np.sin((np.pi*x+inc)*(c_frq/2+8*(y_signal/(2*s_amp))))*c_amp
+        return y_signal, y_carry
     #PSK
+    if type_manipulation.current() == 2:
+        y_signal = discr_signal_gen(i)
+        y_carry = np.sin((np.pi*x+inc + np.pi*(y_signal/(2*s_amp)))*(c_frq/2))*c_amp
+        return y_signal, y_carry
     #OPSK
 
 def normalize(ax):
@@ -198,8 +222,8 @@ s_ax.legend([s_line], ['Сигнал'], loc = 'upper center', frameon=False)
 c_ax.legend([c_line], ['Несущее колебание'], loc = 'upper center', frameon=False)
 m_ax.legend([cm_line, sm_line], ['Модулированное несущее колебание', 'Сигнал'], loc = 'upper center', frameon=False, ncol=2)
 
-ani1 = animation.FuncAnimation(fig, s_ani, np.arange(1, 629), interval=20, blit=True)
+ani1 = animation.FuncAnimation(fig, s_ani, np.arange(1, 1258), interval=20, blit=True)
 ani2 = animation.FuncAnimation(fig, c_ani, np.arange(1, 127), interval=20, blit=True) #if speed = 10.0 => range = 125, interval =20
-ani3 = animation.FuncAnimation(fig, m_ani, np.arange(1, 629), interval=20, blit=True)
+ani3 = animation.FuncAnimation(fig, m_ani, np.arange(1, 1258), interval=20, blit=True)
 
 root.mainloop()
