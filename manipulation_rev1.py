@@ -177,6 +177,25 @@ def calc_mod_ani(i):
         y_carry = np.sin((np.pi*x+inc + np.pi*(y_signal/(2*s_amp)))*(c_frq/2))*c_amp
         return y_signal, y_carry
     #OPSK
+    if type_manipulation.current() == 3:
+        inc2 = int(5*i/np.pi)
+        y_signal = discr_signal_gen(i)
+        if 300-inc2 < -1000:
+            inc2 -= 2000
+        if 300-inc2 > 0:
+            mask_signal = signal.square((np.pi*x+inc + 0 )*0.5)*s_amp + s_amp
+            mask_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc +np.pi)*0.5)*s_amp + s_amp
+        else:
+            mask_signal = signal.square((np.pi*x+inc + np.pi )*0.5)*s_amp + s_amp
+            mask_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*0.5)*s_amp + s_amp
+        y_carry = np.sin((np.pi*x+inc + np.pi*(mask_signal/(2*s_amp)))*(c_frq/2))*c_amp
+        print(i, inc2, 300-inc2)
+        if y_signal[0] == 0:
+            #sys.pause()
+            pass
+        return y_signal, y_carry
+
+
 
 def normalize(ax):
     ax.set_xlim(0, 10)
@@ -206,9 +225,10 @@ s_line, = s_ax.plot(x, y_signal, 'k')
 c_line, = c_ax.plot(x, y_carry)
 
 y_signal = discr_signal_gen(0)
+
+sm_line, = m_ax.plot(x, y_signal, 'k')
 cm_line, = m_ax.plot(x, y_carry, 'r')
 spm_line, = m_ax.plot(x, y_signal, 'k')
-sm_line, = m_ax.plot(x, y_signal, 'k')
 
 s_ax.cla()
 c_ax.cla()

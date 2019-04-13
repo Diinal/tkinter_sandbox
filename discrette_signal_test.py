@@ -13,15 +13,11 @@ x = np.arange(0, 10, 0.01)
 #аналоговый сигнал
 y_signal = np.sin(x*freq) *amp +1
 #дискретный сигнал
-'''y_signal = signal.square(1 *np.pi *x) + 1
+y_signal = signal.square(1 *np.pi *x) + 1
 y_signal[300:400] = 2
 y_signal[400:] = signal.square(1 *np.pi *x[400:] +np.pi) +1
 y_signal[700:800] = 0
-y_signal[800:] = signal.square(1 *np.pi *x[800:]) +1'''
-y_signal = signal.square(5*x) + 1
-position = -310
-y_signal[position:] = signal.square(5*x[position:] +np.pi) +1
-
+y_signal[800:] = signal.square(1 *np.pi *x[800:]) +1
 y_carry = 2*np.sin(8*np.pi*x)
 
 
@@ -47,7 +43,10 @@ line, = ax.plot(x, y_signal)
 line1, = ax2.plot(x, y_carry)
 line2, = ax3.plot(x, y_signal)
 ax.xaxis.set_major_locator(plt.MaxNLocator(20))
-y_carry = 2*np.sin(4*np.pi*x * (y_signal+1))
+y_carry = 2*np.sin(4*np.pi*x +np.pi*(y_signal/2))
+
+
+
 #line3, = ax3.plot(x, y_carry*y_signal/2)
 line3, = ax3.plot(x, y_carry)
 
