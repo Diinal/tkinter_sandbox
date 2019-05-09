@@ -112,6 +112,7 @@ fig = plt.Figure(figsize=(12, 10))
 x = np.arange(0, 10, 0.01)
 
 def discr_signal_gen(i):
+    global bit_0
     #inc = int(i/1.5712)
     inc = i/20
     inc2 = int(5*i/np.pi)
@@ -141,9 +142,42 @@ def discr_signal_gen(i):
     return y_signal
 
 def s_ani(i):
+    inc2 = int(5*i/np.pi)
     y_signal = discr_signal_gen(i)
     s_line.set_ydata(y_signal)
-    return s_line,
+
+    
+    bit_0.set_x((1 - 0.965 - inc2/1000)%1)
+    bit_0.set_text(str(1 if y_signal[(1000-965-inc2)%1000]>0 else 0))
+
+    bit_1.set_x((1 - 0.865 - inc2/1000)%1)
+    bit_1.set_text(str(1 if y_signal[(1000-865-inc2)%1000]>0 else 0))
+
+    bit_2.set_x((1 - 0.765 - inc2/1000)%1)
+    bit_2.set_text(str(1 if y_signal[(1000-765-inc2)%1000]>0 else 0))
+
+    bit_3.set_x((1 - 0.665 - inc2/1000)%1)
+    bit_3.set_text(str(1 if y_signal[(1000-665-inc2)%1000]>0 else 0))
+
+    bit_4.set_x((1 - 0.565 - inc2/1000)%1)
+    bit_4.set_text(str(1 if y_signal[(1000-565-inc2)%1000]>0 else 0))
+
+    bit_5.set_x((1 - 0.465 - inc2/1000)%1)
+    bit_5.set_text(str(1 if y_signal[(1000-465-inc2)%1000]>0 else 0))
+
+    bit_6.set_x((1 - 0.365 - inc2/1000)%1)
+    bit_6.set_text(str(1 if y_signal[(1000-365-inc2)%1000]>0 else 0))
+
+    bit_7.set_x((1 - 0.265 - inc2/1000)%1)
+    bit_7.set_text(str(1 if y_signal[(1000-265-inc2)%1000]>0 else 0))
+
+    bit_8.set_x((1 - 0.165 - inc2/1000)%1)
+    bit_8.set_text(str(1 if y_signal[(1000-165-inc2)%1000]>0 else 0))
+
+    bit_9.set_x((1 - 0.065 - inc2/1000)%1)
+    bit_9.set_text(str(1 if y_signal[(1000-65-inc2)%1000]>0 else 0))
+
+    return s_line, bit_0, bit_1, bit_2, bit_3, bit_4, bit_5, bit_6, bit_7, bit_8, bit_9
 
 def c_ani(i):
     inc = i/(10*np.pi)
@@ -230,6 +264,17 @@ sm_line, = m_ax.plot(x, y_signal, 'k')
 cm_line, = m_ax.plot(x, y_carry, 'r')
 spm_line, = m_ax.plot(x, y_signal, 'k')
 
+bit_0 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_1 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_2 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_3 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_4 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_5 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_6 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_7 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_8 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+bit_9 = s_ax.text(0, 0.6, '', transform = s_ax.transAxes, fontsize = 18)
+
 s_ax.cla()
 c_ax.cla()
 m_ax.cla()
@@ -242,8 +287,14 @@ s_ax.legend([s_line], ['Сигнал'], loc = 'upper center', frameon=False)
 c_ax.legend([c_line], ['Несущее колебание'], loc = 'upper center', frameon=False)
 m_ax.legend([cm_line, sm_line], ['Модулированное несущее колебание', 'Сигнал'], loc = 'upper center', frameon=False, ncol=2)
 
+
+
 ani1 = animation.FuncAnimation(fig, s_ani, np.arange(1, 1258), interval=20, blit=True)
 ani2 = animation.FuncAnimation(fig, c_ani, np.arange(1, 127), interval=20, blit=True) #if speed = 10.0 => range = 125, interval =20
 ani3 = animation.FuncAnimation(fig, m_ani, np.arange(1, 1258), interval=20, blit=True)
+
+'''import inspect
+
+print(inspect.getmembers(bit_0, predicate=inspect.ismethod))'''
 
 root.mainloop()

@@ -121,10 +121,28 @@ def change_modulation(event=None):
         deviation_lbl.place(x = 1270, y = 900)
         deviation_input.place(x = 1380, y = 900)
 
+def scale_up(event=None):
+    prev = signal_lvl.get()
+    signal_lvl.set(prev+1)
+
+def scale_down(event=None):
+    prev = signal_lvl.get()
+    signal_lvl.set(prev-1)
 
 plot_container = tk.LabelFrame(root, text = 'Модуляция', height = 960, width = 1280, font = font_)
 plot_container.grid(row = 0, column = 0, rowspan = 9, padx = 5, pady = 5)
 plot_container.configure(background = background_, foreground = foreground_)
+
+#vert scale
+signal_lvl = tk.IntVar()
+signal_scale = tk.Scale(root, from_ = 100, to = -100, bg = 'white', length = 250, variable = signal_lvl)
+signal_scale.place(x = 25, y = 140)
+
+up_button = tk.Button(root, text = '+', command = scale_up, font = font_, bg = 'white', width = 2)
+up_button.place(x = 25, y = 100)
+
+down_button = tk.Button(root, text = '-', command = scale_down, font = font_, bg = 'white', width = 2)
+down_button.place(x = 25, y = 395)
 
 #Signal frequency
 signal_freq_lbl = ttk.Label(root, text = 'Частота', font = font_)
@@ -204,7 +222,11 @@ def s_ani(i):
     else:
         y_signal,_,__ = calc_mod_ani(i)
         s_line.set_ydata(y_signal)
-        s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
+        #s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
+        if type_modulation.current() != 6 and type_modulation.current() != 7:
+            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ signal_lvl.get())
+        else:
+            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+s_amp)
     return s_line,
 
 def c_ani(i):
@@ -235,9 +257,7 @@ def calc_mod_ani(i):
     #AM
     if type_modulation.current() == 0:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        #y_max = max(y_signal)
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+s_amp
-        #y_max = max(y_signal)
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
         y_carry = np.sin((x+i/50.0)*c_frq)*c_amp*(y_signal/(s_amp*2))
         label = 'Сигнал'
         return y_signal, y_carry, label
@@ -245,11 +265,11 @@ def calc_mod_ani(i):
     #FM
     elif type_modulation.current() == 1:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        #y_max = max(y_signal)
         #dev = 14/y_max
         dev = 1
         if not deviation.get().isalpha() and deviation.get() != '':
-            dev = float(deviation.get())
+            dev = deviation.get().replace(',', '.')
+            dev = float(dev)
         y_carry = np.sin((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq))*c_amp
         label = 'Сигнал'
         return y_signal, y_carry, label
@@ -259,7 +279,8 @@ def calc_mod_ani(i):
         dev = 0.1
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         if not deviation.get().isalpha() and deviation.get() != '':
-            dev = float(deviation.get())
+            dev = deviation.get().replace(',', '.')
+            dev = float(dev)/10
         y_old_carry = np.sin((x+i/50.0)*c_frq)*c_amp
         y_carry = np.sin((x+i/50.0)*c_frq - dev*y_signal)*c_amp
         #label = 'Несущее колебание'
@@ -268,9 +289,8 @@ def calc_mod_ani(i):
 
     #PAM_1
     elif type_modulation.current() == 3:
-        #y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        y_max = s_amp #max(y_signal)
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
+        y_max = s_amp
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+y_max
         y_carry = y_signal*y_carry/(y_max*2)
         label = 'Сигнал'
@@ -278,9 +298,8 @@ def calc_mod_ani(i):
 
     #PAM_2
     elif type_modulation.current() == 4:
-        #y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        y_max = s_amp#max(y_signal)
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
+        y_max = s_amp
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+y_max
         y_carry = average(y_signal*y_carry/(y_max*2))
         label = 'Сигнал'
@@ -289,8 +308,8 @@ def calc_mod_ani(i):
     #PWM
     elif type_modulation.current() == 5:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        y_max = s_amp#max(y_signal)
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+y_max
+        y_max = s_amp
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
         y_carry = signal.square((x+i/50.0)*c_frq, duty=1.5*c_width*y_signal/(y_max*2)+0.08)*c_amp+ y_max
         label = 'Сигнал'
         return y_signal, y_carry, label
@@ -312,7 +331,8 @@ def calc_mod_ani(i):
         prev = 0
         dev = 1
         if not deviation.get().isalpha() and deviation.get() != '':
-            dev = float(deviation.get())
+            dev = deviation.get().replace(',', '.')
+            dev = float(dev)
         for i, a in enumerate(y_generated):
             if a == 2*y_max and prev == 0:
                 y_carry[i+int(dev*y_signal_changed[i]):i+int(dev*y_signal_changed[i]) +m_width] = 2*y_max
@@ -321,7 +341,7 @@ def calc_mod_ani(i):
         label = 'Несущее колебание'
         return y_old_carry, y_carry, label
 
-    #PFM
+    #PFM repair it
     elif type_modulation.current() == 7:
         inc = i/50
         #inc2 = int(1*i/np.pi)
@@ -337,7 +357,8 @@ def calc_mod_ani(i):
         prev = 0
         dev = 1
         if not deviation.get().isalpha() and deviation.get() != '':
-            dev = float(deviation.get())
+            dev = deviation.get().replace(',', '.')
+            dev = float(dev)
 
         for i, a in enumerate(y_generated):
             if a == 2*y_max and prev == 0:
