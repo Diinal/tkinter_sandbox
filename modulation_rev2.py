@@ -69,11 +69,17 @@ def carry_width_change(event = None):
     global c_width
     c_width = int(carry_width.get())/100
 
-
 def change_modulation(event=None):
     global deviation_lbl
     global deviation_input
     global s_amp, c_amp, carry_amp
+
+    types = ['Амплитудная модуляция', 'Частотная модуляция', 'Фазовая модуляция',
+     'Амплитудно-импульсная модуляция 1 рода', 'Амплитудно-импульсная модуляция 2 рода',
+      'Широтно-импульсная модуляция', 'Фазово-импульсная модуляция', 'Частотно-импульсная модуляция',
+       'Импульсно-кодовая модуляция', 'Дельта импульсно-кодовая модуляция']
+
+    type_text.set(types[type_modulation.current()])
 
     if type_modulation.current() == 0:
         carry_amp.set(s_amp*2)
@@ -129,9 +135,15 @@ def scale_down(event=None):
     prev = signal_lvl.get()
     signal_lvl.set(prev-1)
 
-plot_container = tk.LabelFrame(root, text = 'Модуляция', height = 960, width = 1280, font = font_)
+plot_container = tk.LabelFrame(root, text = '', height = 960, width = 1280, font = font_, bg = 'white')
 plot_container.grid(row = 0, column = 0, rowspan = 9, padx = 5, pady = 5)
 plot_container.configure(background = background_, foreground = foreground_)
+
+#main label
+type_text = tk.StringVar()
+type_text.set('Амплитудная модуляция')
+type_label = ttk.Label(plot_container, textvariable = type_text, font = font_, background = background_)
+type_label.grid(row = 0, column = 0, sticky = ('N'), padx = 2, pady = 5)
 
 #vert scale
 signal_lvl = tk.IntVar()
@@ -158,7 +170,7 @@ signal_amp_lbl = ttk.Label(root, text = 'Амплитуда', font = font_)
 signal_amp_lbl.grid(row = 1, column = 1, sticky = 'E', padx = (40, 5))
 signal_amp = tk.IntVar()
 signal_amp.set(25)
-signal_amp_box = tk.Spinbox(root, from_ = 5, to = 300, textvariable = signal_amp, font = font_, foreground = foreground_, command = signal_amp_change, increment = 5.0)
+signal_amp_box = tk.Spinbox(root, from_ = 5, to = 95, textvariable = signal_amp, font = font_, foreground = foreground_, command = signal_amp_change, increment = 5.0)
 signal_amp_box.grid(row = 1, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
 signal_amp_box.bind('<Return>', func)
 
@@ -177,7 +189,7 @@ carry_amp_lbl = ttk.Label(root, text = 'Амплитуда', font = font_)
 carry_amp_lbl.grid(row = 4, column = 1, sticky = ('E'), padx = (40, 5), pady = 5)
 carry_amp = tk.IntVar()
 carry_amp.set(50)
-carry_amp_box = tk.Spinbox(root, from_ = 5, to = 300, textvariable = carry_amp, font = font_, foreground = foreground_, command = carry_amp_change, increment = 5.0, state = 'disable')
+carry_amp_box = tk.Spinbox(root, from_ = 5, to = 100, textvariable = carry_amp, font = font_, foreground = foreground_, command = carry_amp_change, increment = 5.0, state = 'disable')
 carry_amp_box.grid(row = 4, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
 carry_amp_box.bind('<Return>', func)
 
@@ -194,7 +206,7 @@ type_m_lbl.grid(row = 6, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady =
 type_m = tk.StringVar()
 type_modulation = ttk.Combobox(root, state = 'readonly', textvariable = type_m , font = font_)
 type_modulation.grid(row = 6, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
-type_modulation['values'] = ('АМ', 'ЧМ', 'ФМ', 'АИМ 1 рода', 'АИМ 2 рода', 'ШИМ', 'ФИМ', 'ЧИМ', 'ИКМ')
+type_modulation['values'] = ('АМ', 'ЧМ', 'ФМ', 'АИМ 1 рода', 'АИМ 2 рода', 'ШИМ', 'ФИМ', 'ЧИМ', 'ИКМ', 'ДИКМ')
 type_modulation.current(0)
 root.option_add('*TCombobox*Listbox.font', font_)
 type_modulation.bind('<<ComboboxSelected>>', change_modulation)
@@ -398,7 +410,7 @@ def normalize(ax):
     ax.set_ylabel('амплитуда')
 
 canvas = FigureCanvasTkAgg(fig, master=plot_container)
-canvas.get_tk_widget().grid(row=0,column=0)
+canvas.get_tk_widget().grid(row=1,column=0)
 
 s_ax = fig.add_subplot(311)
 c_ax = fig.add_subplot(312)

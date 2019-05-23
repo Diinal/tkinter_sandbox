@@ -15,7 +15,7 @@ foreground_ = '#2c2f33'
 
 root = tk.Tk()
 root.configure(background = background_)
-root.title('Модуляция')
+root.title('Манипуляция')
 #root.geometry('1920x1080')
 root.resizable(1280, 720)
 
@@ -60,12 +60,20 @@ def carry_amp_change(event=None):
     c_amp = int(carry_amp.get())
 
 def change_manipulation(event = None):
+    types = ['Амплитудная манипуляция', 'Частотная манипуляция', 'Фазовая манипуляция', 'Относительно-фазовая манипуляция',]
+    type_text.set(types[type_manipulation.current()])
     if type_manipulation.current() == 0:
         pass
 
-plot_container = tk.LabelFrame(root, text = 'Манипуляция', height = 960, width = 1280, font = font_)
+plot_container = tk.LabelFrame(root, text = '', height = 960, width = 1280, font = font_)
 plot_container.grid(row = 0, column = 0, rowspan = 9, padx = 5, pady = 5)
 plot_container.configure(background = background_, foreground = foreground_)
+
+#main label
+type_text = tk.StringVar()
+type_text.set('Амплитудная манипуляция')
+type_label = ttk.Label(plot_container, textvariable = type_text, font = font_, background = background_)
+type_label.grid(row = 0, column = 0, sticky = ('N'), padx = 2, pady = 5)
 
 #Signal parameters
 #NOT TODAY!!!
@@ -223,7 +231,7 @@ def calc_mod_ani(i):
             mask_signal = signal.square((np.pi*x+inc + np.pi )*0.5)*s_amp + s_amp
             mask_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*0.5)*s_amp + s_amp
         y_carry = np.sin((np.pi*x+inc + np.pi*(mask_signal/(2*s_amp)))*(c_frq/2))*c_amp
-        print(i, inc2, 300-inc2)
+        #print(i, inc2, 300-inc2)
         if y_signal[0] == 0:
             #sys.pause()
             pass
@@ -245,7 +253,7 @@ def normalize(ax):
 
 
 canvas = FigureCanvasTkAgg(fig, master=plot_container)
-canvas.get_tk_widget().grid(row=0,column=0)
+canvas.get_tk_widget().grid(row=1,column=0)
 
 s_ax = fig.add_subplot(311)
 c_ax = fig.add_subplot(312)
