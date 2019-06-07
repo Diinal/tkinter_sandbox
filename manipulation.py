@@ -60,7 +60,7 @@ def carry_amp_change(event=None):
     c_amp = int(carry_amp.get())
 
 def change_manipulation(event = None):
-    types = ['Амплитудная манипуляция', 'Частотная манипуляция', 'Фазовая манипуляция', 'Относительно-фазовая манипуляция',]
+    types = ['Амплитудная манипуляция (телеграфия)', 'Частотная манипуляция (телеграфия)', 'Фазовая манипуляция (телеграфия)', 'Относительно-фазовая манипуляция (телеграфия)',]
     type_text.set(types[type_manipulation.current()])
     if type_manipulation.current() == 0:
         pass
