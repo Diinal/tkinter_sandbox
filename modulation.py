@@ -234,7 +234,6 @@ def s_ani(i):
     else:
         y_signal,_,__ = calc_mod_ani(i)
         s_line.set_ydata(y_signal)
-        #s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
         if type_modulation.current() != 6 and type_modulation.current() != 7:
             s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ signal_lvl.get())
         else:
@@ -329,8 +328,6 @@ def calc_mod_ani(i):
     #PPM
     elif type_modulation.current() == 6:
         inc = i/50
-        #inc2 = int(1*i/np.pi)
-
         y_max = s_amp
 
         y_signal_changed = (np.sin((x+inc)*s_frq)*s_amp)
@@ -353,10 +350,9 @@ def calc_mod_ani(i):
         label = 'Несущее колебание'
         return y_old_carry, y_carry, label
 
-    #PFM repair it
+    #PFM
     elif type_modulation.current() == 7:
         inc = i/50
-        #inc2 = int(1*i/np.pi)
 
         y_max = s_amp
 

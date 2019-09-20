@@ -35,21 +35,6 @@ style.theme_create('mod_theme', parent = 'alt', settings = {
 style.theme_use("mod_theme")
 
 
-'''#signal
-def signal_freq_change(event=None):
-    global s_frq
-    s_frq = int(signal_freq.get())
-
-def signal_amp_change(event=None):
-    global s_amp, c_amp, carry_amp
-    s_amp = int(signal_amp.get())
-    if type_modulation.current() == 0:
-        carry_amp.set(s_amp*2)
-        c_amp = s_amp*2
-    elif type_modulation.current() >= 2:
-        carry_amp.set(s_amp)
-        c_amp = s_amp'''
-
 #carry
 def carry_freq_change(event=None):
     global c_frq
@@ -108,8 +93,6 @@ root.option_add('*TCombobox*Listbox.font', font_)
 type_manipulation.bind('<<ComboboxSelected>>', change_manipulation)
 
 #variables
-'''s_frq = int(signal_freq.get())
-s_amp = int(signal_amp.get())'''
 s_amp = 25
 
 c_frq = int(carry_freq.get())
@@ -133,20 +116,6 @@ def discr_signal_gen(i):
     else:
         y_signal = signal.square((np.pi*x+inc + np.pi )*1)*s_amp + s_amp
         y_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*1)*s_amp + s_amp
-    '''position = 949 #629
-    s_frq = 5
-    phi = 0
-    if position-inc2 < -1000:
-        inc2 -= 2000
-    if i == 815:
-        phi = -10
-    if position-inc2 > 0:
-        y_signal = signal.square((np.pi*x+inc)*s_frq)*s_amp + s_amp
-        y_signal[position-inc2:] = signal.square((x[position-inc2:]+inc + np.pi)*s_frq)*s_amp + s_amp
-    else:
-        y_signal = signal.square((x+inc + np.pi)*s_frq)*s_amp + s_amp
-        y_signal[position-inc2:] = signal.square((x[position-inc2:]+inc - 4.9)*s_frq)*s_amp + s_amp'''
-    #print(i, 300-inc2)
     return y_signal
 
 def s_ani(i):
@@ -231,9 +200,7 @@ def calc_mod_ani(i):
             mask_signal = signal.square((np.pi*x+inc + np.pi )*0.5)*s_amp + s_amp
             mask_signal[300-inc2:] = signal.square((np.pi*x[300-inc2:]+inc + 0)*0.5)*s_amp + s_amp
         y_carry = np.sin((np.pi*x+inc + np.pi*(mask_signal/(2*s_amp)))*(c_frq/2))*c_amp
-        #print(i, inc2, 300-inc2)
         if y_signal[0] == 0:
-            #sys.pause()
             pass
         return y_signal, y_carry
 
@@ -243,7 +210,6 @@ def normalize(ax):
     ax.set_xlim(0, 10)
     ax.set_ylim(-100, 100)
     ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    #ax.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
     ax.spines['bottom'].set_position('center')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
