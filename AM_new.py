@@ -83,6 +83,14 @@ plot_container_settings = tk.LabelFrame(root, text = 'Настройки', heigh
 plot_container_settings.grid(row = 1, column = 0, columnspan = 1, padx = (60, 10), pady = 20, sticky = ('N','W','S','E'))
 plot_container_settings.configure(background = background_, foreground = foreground_)
 
+signal_settings = tk.LabelFrame(plot_container_settings, text = 'Сигнал:', height = plot_height//2, width = plot_width, font = font_, bg = 'white')
+signal_settings.grid(row = 0, column = 0, padx = (20, 5), pady = 20)
+signal_settings.configure(background = background_, foreground = foreground_)
+
+carry_settings = tk.LabelFrame(plot_container_settings, text = 'Несущее колебание:', height = plot_height//2, width = plot_width, font = font_, bg = 'white')
+carry_settings.grid(row = 1, column = 0, padx = (20, 5), pady = 20)
+carry_settings.configure(background = background_, foreground = foreground_)
+
 plot_container_carry = tk.LabelFrame(root, text = 'Несущее колебание', height = plot_height, width = plot_width, font = font_, bg = 'white')
 plot_container_carry.grid(row = 1, column = 2, columnspan = 2, rowspan = 1, padx = 10, pady = 20, sticky = ('W'))
 plot_container_carry.configure(background = background_, foreground = foreground_)
@@ -99,34 +107,34 @@ down_button = tk.Button(root, text = '-', command = scale_down, font = font_, bg
 down_button.place(x = 5, y = 405)
 
 #Signal frequency
-signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Сигнал:', font = font_)
-signal_freq_lbl.grid(row = 0, column = 1, sticky = ('E', 'S'), padx = (5, 5), pady = 5)
-signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Частота', font = font_)
-signal_freq_lbl.grid(row = 1, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
+#signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Сигнал:', font = font_)
+#signal_freq_lbl.grid(row = 0, column = 1, sticky = ('E', 'S'), padx = (5, 5), pady = 5)
+signal_freq_lbl = ttk.Label(signal_settings, text = 'Частота', font = font_)
+signal_freq_lbl.grid(row = 1, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 15)
 signal_freq = tk.IntVar()
 signal_freq.set(2)
-signal_freq_box = tk.Spinbox(plot_container_settings, from_ = 1, to = 100, textvariable = signal_freq, font = font_, foreground = foreground_, command = signal_freq_change)
-signal_freq_box.grid(row = 1, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
+signal_freq_box = tk.Spinbox(signal_settings, from_ = 1, to = 100, textvariable = signal_freq, font = font_, foreground = foreground_, command = signal_freq_change)
+signal_freq_box.grid(row = 1, column = 2, sticky = ('E', 'W', 'S'), padx = (2, 15), pady = 15)
 signal_freq_box.bind('<Return>', func)
 
 #Signal amplitude
-signal_amp_lbl = ttk.Label(plot_container_settings, text = 'Амплитуда', font = font_)
-signal_amp_lbl.grid(row = 2, column = 1, sticky = 'E', padx = (40, 5))
+signal_amp_lbl = ttk.Label(signal_settings, text = 'Амплитуда', font = font_)
+signal_amp_lbl.grid(row = 2, column = 1, sticky = 'E', padx = (40, 5), pady = 15)
 signal_amp = tk.IntVar()
 signal_amp.set(25)
-signal_amp_box = tk.Spinbox(plot_container_settings, from_ = 5, to = 95, textvariable = signal_amp, font = font_, foreground = foreground_, command = signal_amp_change, increment = 5.0)
-signal_amp_box.grid(row = 2, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
+signal_amp_box = tk.Spinbox(signal_settings, from_ = 5, to = 95, textvariable = signal_amp, font = font_, foreground = foreground_, command = signal_amp_change, increment = 5.0)
+signal_amp_box.grid(row = 2, column = 2, sticky = ('E', 'W'), padx = (2, 15), pady = 15)
 signal_amp_box.bind('<Return>', func)
 
 #Carrying frequency
-signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Несущее колебание:', font = font_)
-signal_freq_lbl.grid(row = 3, column = 1, sticky = ('E', 'S'), padx = (5, 5), pady = (30, 5))
-carry_freq_lbl = ttk.Label(plot_container_settings, text = 'Частота', font = font_)
-carry_freq_lbl.grid(row = 4, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
+#signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Несущее колебание:', font = font_)
+#signal_freq_lbl.grid(row = 3, column = 1, sticky = ('E', 'S'), padx = (5, 5), pady = (30, 5))
+carry_freq_lbl = ttk.Label(carry_settings, text = 'Частота', font = font_)
+carry_freq_lbl.grid(row = 4, column = 1, sticky = ('E', 'S'), padx = (65, 5), pady = 15)
 carry_freq = tk.IntVar()
 carry_freq.set(40)
-carry_freq_box = tk.Spinbox(plot_container_settings, from_ = 10, to = 100, textvariable = carry_freq, font = font_, foreground = foreground_, command = carry_freq_change, increment = 5.0)
-carry_freq_box.grid(row = 4, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
+carry_freq_box = tk.Spinbox(carry_settings, from_ = 10, to = 100, textvariable = carry_freq, font = font_, foreground = foreground_, command = carry_freq_change, increment = 5.0)
+carry_freq_box.grid(row = 4, column = 2, sticky = ('E', 'W', 'S'), padx = (2, 15), pady = 15)
 carry_freq_box.bind('<Return>', carry_freq_change)
 
 carry_amp = tk.IntVar()
@@ -149,7 +157,12 @@ c_amp = int(carry_amp.get())
 
 #plotting
 def s_ani(i):
-    s_line.set_ydata((np.sin((x-i/50.0)*s_frq)*s_amp)+signal_lvl.get())
+    if (max(np.sin((x-i/50.0)*s_frq)*s_amp) + signal_lvl.get()) < 99 and (min(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) > -99:
+        s_line.set_ydata(np.sin((x-i/50.0)*s_frq)*s_amp + signal_lvl.get())
+    elif signal_lvl.get() > 0:
+        s_line.set_ydata(np.sin((x-i/50.0)*s_frq)*s_amp + 99 - s_amp)
+    else:
+        s_line.set_ydata(np.sin((x-i/50.0)*s_frq)*s_amp - 99 + s_amp)
     return s_line,
 
 def c_ani(i):
@@ -157,12 +170,21 @@ def c_ani(i):
     return c_line,
 
 def m_ani(i):
-    y_signal = (np.sin((x-i/50.0)*s_frq)*s_amp)+signal_lvl.get()
+    y_signal = (np.sin((x-i/50.0)*s_frq)*s_amp)
+
+    if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
+        y_signal = y_signal + signal_lvl.get()
+    elif signal_lvl.get() > 0:
+        y_signal = y_signal + 99 - s_amp
+    else:
+        y_signal = y_signal - 99 + s_amp
+    
     cm_line.set_ydata(np.sin((x-i/50.0)*c_frq)*c_amp*(y_signal/(s_amp*2)))
     sm_line.set_ydata(y_signal)
     sm_line.set_color('k')
     spm_line.set_ydata(0)
     subsignal_label.set_text('Сигнал')
+
     return cm_line, sm_line, spm_line, subsignal_label
 
 def normalize(ax):
