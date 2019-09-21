@@ -376,8 +376,6 @@ def calc_mod_ani(i):
     #PPM
     elif type_modulation.current() == 6:
         inc = i/50
-        #inc2 = int(1*i/np.pi)
-
         y_max = s_amp
 
         y_signal_changed = (np.sin((x+inc)*s_frq)*s_amp)
@@ -403,7 +401,6 @@ def calc_mod_ani(i):
     #PFM
     elif type_modulation.current() == 7:
         inc = i/50
-        #inc2 = int(1*i/np.pi)
 
         y_max = s_amp
 
