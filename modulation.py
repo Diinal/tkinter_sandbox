@@ -9,10 +9,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from scipy import signal
 
-#TODO
-# create new gui without notebook with embeded matplotlib+
-# create function for changable variables+
-
 font_ = ('Arial', 14)
 background_ = '#f5f5f5'
 foreground_ = '#2c2f33'
@@ -81,6 +77,7 @@ def change_modulation(event=None):
 
     type_text.set(types[type_modulation.current()])
 
+    # FIXME BUG 18.08.2019 state = 'disable' don't remove when type of modulation is changed
     if type_modulation.current() == 0:
         carry_amp.set(s_amp*2)
         c_amp = s_amp*2
@@ -115,7 +112,7 @@ def change_modulation(event=None):
         carry_width_box.place(x = 1380, y = 625)
         carry_width_percent_lbl.place(x = 1480, y = 625)
     
-    elif type_modulation.current() >= 6:
+    elif type_modulation.current() >= 6 and type_modulation.current() < 8:
         carry_amp.set(s_amp)
         c_amp = s_amp
         carry_amp_box.configure(state = 'disable' )
@@ -126,6 +123,16 @@ def change_modulation(event=None):
         carry_width_percent_lbl.place(x = 1480, y = 625)
         deviation_lbl.place(x = 1270, y = 900)
         deviation_input.place(x = 1380, y = 900)
+    
+    elif type_modulation.current() == 8:
+        carry_amp.set(s_amp)
+        c_amp = s_amp
+        signal_amp_box.configure(state = 'disable')
+        signal_freq_box.configure(state = 'disable')
+        carry_amp_box.configure(state = 'disable' )
+        carry_freq_box.configure(state = 'disable')
+        deviation_lbl.place_forget()
+        deviation_input.place_forget()
 
 def scale_up(event=None):
     prev = signal_lvl.get()
@@ -234,8 +241,17 @@ def s_ani(i):
     else:
         y_signal,_,__ = calc_mod_ani(i)
         s_line.set_ydata(y_signal)
-        if type_modulation.current() != 6 and type_modulation.current() != 7:
-            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ signal_lvl.get())
+        #s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
+        if type_modulation.current() < 6 and type_modulation.current() > 8:
+            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp )
+
+            if (max(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) < 99 and (min(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) > -99:
+                s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp + signal_lvl.get())
+            elif signal_lvl.get() > 0:
+                s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp + 99 - s_amp)
+            else:
+                s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp - 99 + s_amp)
+
         else:
             s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+s_amp)
     return s_line,
@@ -268,7 +284,15 @@ def calc_mod_ani(i):
     #AM
     if type_modulation.current() == 0:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+ signal_lvl.get()
+
+        if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
+            y_signal = y_signal + signal_lvl.get()
+        elif signal_lvl.get() > 0:
+             y_signal = y_signal + 99 - s_amp
+        else:
+             y_signal = y_signal - 99 + s_amp
+
         y_carry = np.sin((x+i/50.0)*c_frq)*c_amp*(y_signal/(s_amp*2))
         label = 'Сигнал'
         return y_signal, y_carry, label
@@ -301,7 +325,15 @@ def calc_mod_ani(i):
     #PAM_1
     elif type_modulation.current() == 3:
         y_max = s_amp
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+signal_lvl.get()
+        
+        if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
+            y_signal = y_signal + signal_lvl.get()
+        elif signal_lvl.get() > 0:
+             y_signal = y_signal + 99 - s_amp
+        else:
+             y_signal = y_signal - 99 + s_amp
+
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+y_max
         y_carry = y_signal*y_carry/(y_max*2)
         label = 'Сигнал'
@@ -310,7 +342,15 @@ def calc_mod_ani(i):
     #PAM_2
     elif type_modulation.current() == 4:
         y_max = s_amp
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+signal_lvl.get()
+        
+        if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
+            y_signal = y_signal + signal_lvl.get()
+        elif signal_lvl.get() > 0:
+             y_signal = y_signal + 99 - s_amp
+        else:
+             y_signal = y_signal - 99 + s_amp
+
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+y_max
         y_carry = average(y_signal*y_carry/(y_max*2))
         label = 'Сигнал'
@@ -320,7 +360,15 @@ def calc_mod_ani(i):
     elif type_modulation.current() == 5:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = s_amp
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp)+signal_lvl.get()
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+signal_lvl.get()
+        
+        if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
+            y_signal = y_signal + signal_lvl.get()
+        elif signal_lvl.get() > 0:
+             y_signal = y_signal + 99 - s_amp
+        else:
+             y_signal = y_signal - 99 + s_amp
+
         y_carry = signal.square((x+i/50.0)*c_frq, duty=1.5*c_width*y_signal/(y_max*2)+0.08)*c_amp+ y_max
         label = 'Сигнал'
         return y_signal, y_carry, label
@@ -376,6 +424,20 @@ def calc_mod_ani(i):
         label = 'Сигнал'
         y_signal = (np.sin((x+inc)*s_frq)*s_amp)+y_max
         return y_signal, y_carry, label
+
+    #PCM
+    elif type_modulation.current() == 8:
+    # hash with quant coridors and binary values aka {'00': [-25, 25]}
+    # cursors that takes a value of signal and then we check it in quant coridors and display binary value
+    # or izi method with animated plot without customization, but looks nice 
+        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
+        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) + s_amp
+        y_carry = signal.square((x+i/50.0)*c_frq, duty=1.5*c_width*y_signal/(s_amp*2)+0.08)*c_amp - s_amp
+        label = 'Сигнал'
+        return y_signal, y_carry, label
+
+    #DPCM
+    # hueta
 
 def average(y_mod):
     s, counter, prev = 0, 0, 0
