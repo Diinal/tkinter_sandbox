@@ -156,6 +156,7 @@ type_label.grid(row = 0, column = 0, sticky = ('N'), padx = 2, pady = 5)
 signal_lvl = tk.IntVar()
 signal_scale = tk.Scale(root, from_ = 100, to = -100, bg = 'white', length = 250, variable = signal_lvl)
 signal_scale.place(x = 25, y = 140)
+signal_lvl.set(25)
 
 up_button = tk.Button(root, text = '+', command = scale_up, font = font_, bg = 'white', width = 2)
 up_button.place(x = 25, y = 100)
@@ -164,7 +165,7 @@ down_button = tk.Button(root, text = '-', command = scale_down, font = font_, bg
 down_button.place(x = 25, y = 395)
 
 #Signal frequency
-signal_freq_lbl = ttk.Label(root, text = 'Частота', font = font_)
+signal_freq_lbl = ttk.Label(root, text = 'Частота (fc)', font = font_)
 signal_freq_lbl.grid(row = 0, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
 signal_freq = tk.IntVar()
 signal_freq.set(2)
@@ -183,7 +184,7 @@ signal_amp_box.bind('<Return>', func)
 
 
 #Carrying frequency
-carry_freq_lbl = ttk.Label(root, text = 'Частота', font = font_)
+carry_freq_lbl = ttk.Label(root, text = 'Частота (fн)', font = font_)
 carry_freq_lbl.grid(row = 3, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
 carry_freq = tk.IntVar()
 carry_freq.set(40)
@@ -294,7 +295,7 @@ def calc_mod_ani(i):
              y_signal = y_signal - 99 + s_amp
 
         y_carry = np.sin((x+i/50.0)*c_frq)*c_amp*(y_signal/(s_amp*2))
-        label = 'Сигнал'
+        label = 'Сигнал с fc'
         return y_signal, y_carry, label
 
     #FM
@@ -306,7 +307,7 @@ def calc_mod_ani(i):
             dev = deviation.get().replace(',', '.')
             dev = float(dev)
         y_carry = np.sin((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq))*c_amp
-        label = 'Сигнал'
+        label = 'Сигнал с fc'
         return y_signal, y_carry, label
 
     #PM
@@ -496,8 +497,8 @@ normalize(s_ax)
 normalize(c_ax)
 normalize(m_ax)
 
-s_ax.legend([s_line], ['Сигнал'], loc = 'upper center', frameon=False)
-c_ax.legend([c_line], ['Несущее колебание'], loc = 'upper center', frameon=False)
+s_ax.legend([s_line], ['Сигнал с fc'], loc = 'upper center', frameon=False)
+c_ax.legend([c_line], ['Несущее колебание с fн'], loc = 'upper center', frameon=False)
 m_ax.legend([cm_line, sm_line], ['Модулированное несущее колебание', ' '], loc = 'upper center', frameon=False, ncol=2)
 subsignal_label = m_ax.text(0.7, 0.90, '', transform=m_ax.transAxes)
 #c_repeatable_point = int(250 * c_frq / 10)
