@@ -87,6 +87,7 @@ def change_modulation(event=None):
         carry_width_lbl.place_forget()
         carry_width_box.place_forget()
         carry_width_percent_lbl.place_forget()
+        white_label.place_forget()
 
     elif type_modulation.current() == 1:
         # carry_freq.set(40)
@@ -102,6 +103,7 @@ def change_modulation(event=None):
         carry_width_lbl.place_forget()
         carry_width_box.place_forget()
         carry_width_percent_lbl.place_forget()
+        white_label.place(x = 750, y = 710)
 
     elif type_modulation.current() == 2:
         # carry_freq.set(15)
@@ -117,6 +119,7 @@ def change_modulation(event=None):
         carry_width_lbl.place_forget()
         carry_width_box.place_forget()
         carry_width_percent_lbl.place_forget()
+        white_label.place_forget()
 
 def scale_up(event=None):
     prev = signal_lvl.get()
@@ -207,6 +210,8 @@ deviation = tk.StringVar()
 deviation_lbl = ttk.Label(root, text = 'Девиация', font = font_)
 deviation_input = ttk.Entry(root, textvariable = deviation, font = font_)
 
+white_label = ttk.Label(root, text = '             ', font = font_, background = 'white')
+
 
 #variables
 s_frq = int(signal_freq.get())
@@ -241,11 +246,11 @@ def m_ani(i):
     spm_line.set_ydata(y_envelope_down)
     if type_modulation.current() == 2:
         sm_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
-        sm_line.set( linewidth = 0.75)
+        sm_line.set( linewidth = 0.75 )
         subsignal_label_down.set_y(0.85)
     elif type_modulation.current() == 1:
         sm_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
-        sm_line.set(linewidth = 0.75)
+        sm_line.set(linewidth = 0.75 )
 
     subsignal_label_up.set_text(label_up)
     subsignal_label_down.set_text(label_down)

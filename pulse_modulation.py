@@ -16,7 +16,7 @@ foreground_ = '#2c2f33'
 root = tk.Tk()
 root.configure(background = background_)
 root.title('Модуляция')
-#root.geometry('1920x1080')
+
 root.resizable(1280, 720)
 
 #style
@@ -70,39 +70,13 @@ def change_modulation(event=None):
     global deviation_input
     global s_amp, c_amp, carry_amp
 
-    types = ['Амплитудная модуляция', 'Частотная модуляция', 'Фазовая модуляция',
-     'Амплитудно-импульсная модуляция 1 рода', 'Амплитудно-импульсная модуляция 2 рода',
-      'Широтно-импульсная модуляция', 'Фазово-импульсная модуляция', 'Частотно-импульсная модуляция',
-       'Импульсно-кодовая модуляция', 'Дельта импульсно-кодовая модуляция']
+    types = ['Амплитудно-импульсная модуляция 1 рода', 'Амплитудно-импульсная модуляция 2 рода',
+      'Широтно-импульсная модуляция', 'Фазово-импульсная модуляция', 'Частотно-импульсная модуляция']
 
     type_text.set(types[type_modulation.current()])
 
     # FIXME BUG 18.08.2019 state = 'disable' don't remove when type of modulation is changed
-    if type_modulation.current() == 0:
-        carry_amp.set(s_amp*2)
-        c_amp = s_amp*2
-        carry_amp_box.configure(state = 'disable' )
-        #deviation_lbl.grid_remove()
-        #deviation_input.grid_remove()
-        deviation_lbl.place_forget()
-        deviation_input.place_forget()
-        carry_width_lbl.place_forget()
-        carry_width_box.place_forget()
-        carry_width_percent_lbl.place_forget()
-
-    elif type_modulation.current() == 1 or type_modulation.current() == 2:
-        carry_amp.set(s_amp)
-        c_amp = s_amp
-        carry_amp_box.configure(state = 'disable' )
-        #deviation_lbl.grid(row = 7, column = 1, sticky = ('E'), padx = (40, 5), pady = 5)
-        #deviation_input.grid(row = 7, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
-        deviation_lbl.place(x = 1270, y = 900)
-        deviation_input.place(x = 1380, y = 900)
-        carry_width_lbl.place_forget()
-        carry_width_box.place_forget()
-        carry_width_percent_lbl.place_forget()
-
-    elif type_modulation.current() >= 3 and type_modulation.current() < 6:
+    if type_modulation.current() >= 0 and type_modulation.current() < 3:
         carry_amp.set(s_amp)
         c_amp = s_amp
         carry_amp_box.configure(state = 'disable' )
@@ -112,7 +86,7 @@ def change_modulation(event=None):
         carry_width_box.place(x = 1380, y = 625)
         carry_width_percent_lbl.place(x = 1480, y = 625)
     
-    elif type_modulation.current() >= 6 and type_modulation.current() < 8:
+    elif type_modulation.current() >= 3 and type_modulation.current() < 5:
         carry_amp.set(s_amp)
         c_amp = s_amp
         carry_amp_box.configure(state = 'disable' )
@@ -124,7 +98,7 @@ def change_modulation(event=None):
         deviation_lbl.place(x = 1270, y = 900)
         deviation_input.place(x = 1380, y = 900)
     
-    elif type_modulation.current() == 8:
+    elif type_modulation.current() == 5:
         carry_amp.set(s_amp)
         c_amp = s_amp
         signal_amp_box.configure(state = 'disable')
@@ -148,7 +122,7 @@ plot_container.configure(background = background_, foreground = foreground_)
 
 #main label
 type_text = tk.StringVar()
-type_text.set('Амплитудная модуляция')
+type_text.set('Амплитудно-импульсная модуляция 1 рода')
 type_label = ttk.Label(plot_container, textvariable = type_text, font = font_, background = background_)
 type_label.grid(row = 0, column = 0, sticky = ('N'), padx = 2, pady = 5)
 
@@ -187,7 +161,7 @@ signal_amp_box.bind('<Return>', func)
 carry_freq_lbl = ttk.Label(root, text = 'Частота (fн)', font = font_)
 carry_freq_lbl.grid(row = 3, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
 carry_freq = tk.IntVar()
-carry_freq.set(40)
+carry_freq.set(20)
 carry_freq_box = tk.Spinbox(root, from_ = 10, to = 100, textvariable = carry_freq, font = font_, foreground = foreground_, command = carry_freq_change, increment = 5.0)
 carry_freq_box.grid(row = 3, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
 carry_freq_box.bind('<Return>', carry_freq_change)
@@ -196,7 +170,7 @@ carry_freq_box.bind('<Return>', carry_freq_change)
 carry_amp_lbl = ttk.Label(root, text = 'Амплитуда', font = font_)
 carry_amp_lbl.grid(row = 4, column = 1, sticky = ('E'), padx = (40, 5), pady = 5)
 carry_amp = tk.IntVar()
-carry_amp.set(50)
+carry_amp.set(25)
 carry_amp_box = tk.Spinbox(root, from_ = 5, to = 100, textvariable = carry_amp, font = font_, foreground = foreground_, command = carry_amp_change, increment = 5.0, state = 'disable')
 carry_amp_box.grid(row = 4, column = 2, sticky = ('E', 'W'), padx = 2, pady = 5)
 carry_amp_box.bind('<Return>', func)
@@ -208,13 +182,17 @@ carry_width = tk.IntVar()
 carry_width_box = tk.Spinbox(root, from_ = 1, to = 100, textvariable = carry_width, font = font_, foreground = foreground_, command = carry_width_change, increment = 5.0, width = 5)
 carry_width.set(50)
 
+carry_width_lbl.place(x = 1280, y = 625)
+carry_width_box.place(x = 1380, y = 625)
+carry_width_percent_lbl.place(x = 1480, y = 625)
+
 #Type of modulation switcher
 type_m_lbl = ttk.Label(root, text = 'Тип:', font = font_)
 type_m_lbl.grid(row = 6, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 5)
 type_m = tk.StringVar()
 type_modulation = ttk.Combobox(root, state = 'readonly', textvariable = type_m , font = font_)
 type_modulation.grid(row = 6, column = 2, sticky = ('E', 'W', 'S'), padx = 2, pady = 5)
-type_modulation['values'] = ('АМ', 'ЧМ', 'ФМ', 'АИМ 1 рода', 'АИМ 2 рода', 'ШИМ', 'ФИМ', 'ЧИМ', 'ИКМ', 'ДИКМ')
+type_modulation['values'] = ('АИМ 1 рода', 'АИМ 2 рода', 'ШИМ', 'ФИМ', 'ЧИМ')
 type_modulation.current(0)
 root.option_add('*TCombobox*Listbox.font', font_)
 type_modulation.bind('<<ComboboxSelected>>', change_modulation)
@@ -222,6 +200,7 @@ type_modulation.bind('<<ComboboxSelected>>', change_modulation)
 deviation = tk.StringVar()
 deviation_lbl = ttk.Label(root, text = 'Девиация', font = font_)
 deviation_input = ttk.Entry(root, textvariable = deviation, font = font_)
+deviation.set(1)
 
 
 #variables
@@ -237,94 +216,49 @@ fig = plt.Figure(figsize=(12, 10))
 x = np.arange(0, 10, 0.01)
 
 def s_ani(i):
-    if type_modulation.current() != 0 and type_modulation.current() < 3:
-        s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
-    else:
-        y_signal,_,__ = calc_mod_ani(i)
-        s_line.set_ydata(y_signal)
-        #s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
-        if type_modulation.current() < 6 and type_modulation.current() > 8:
-            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp )
+    y_signal,_,__, ___ = calc_mod_ani(i)
+    s_line.set_ydata(y_signal)
+    #s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+ s_amp)
+    if type_modulation.current() < 3 and type_modulation.current() > 5:
+        s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp )
 
-            if (max(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) < 99 and (min(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) > -99:
-                s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp + signal_lvl.get())
-            elif signal_lvl.get() > 0:
-                s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp + 99 - s_amp)
-            else:
-                s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp - 99 + s_amp)
-
+        if (max(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) < 99 and (min(np.sin((x+i/50.0)*s_frq)*s_amp) + signal_lvl.get()) > -99:
+            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp + signal_lvl.get())
+        elif signal_lvl.get() > 0:
+            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp + 99 - s_amp)
         else:
-            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+s_amp)
+            s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp - 99 + s_amp)
+
+    else:
+        s_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+s_amp)
     return s_line,
 
 def c_ani(i):
-    if type_modulation.current() <= 2:
-        c_line.set_ydata(np.sin((x+i/50.0)*c_frq)*c_amp)
-    else:
-        y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp
-        y_max = max(y_carry)
-        c_line.set_ydata(y_carry+y_max)
+    y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp
+    y_max = max(y_carry)
+    c_line.set_ydata(y_carry+y_max)
     return c_line,
 
 def m_ani(i):
-    y_signal, y_carry, label = calc_mod_ani(i)
+    y_signal, y_carry, label, label_carry = calc_mod_ani(i)
     cm_line.set_ydata(y_carry)
     sm_line.set_ydata(y_signal)
-    sm_line.set_color('k')
+    sm_line.set_color('r')
     spm_line.set_ydata(0)
-    if type_modulation.current() == 2:
-        spm_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp)
-    elif type_modulation.current() == 6:
-        spm_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+s_amp)
+    if type_modulation.current() == 3:
+        sm_line.set_ydata(np.sin((x+i/50.0)*s_frq)*s_amp+s_amp)
+
     subsignal_label.set_text(label)
-    if type_modulation.current() == 2 or type_modulation.current() == 6:
-        sm_line.set_color('#1f77b4')
-    return cm_line, sm_line, spm_line, subsignal_label
+    subcarry_label.set_text(label_carry)
+    #if type_modulation.current() == 3:
+        #spm_line.set_color('#1f77b4')
+        #spm_line.set_ydata(y_signal)
+    return cm_line, sm_line, spm_line, subsignal_label, subcarry_label
 
 def calc_mod_ani(i):
-    #AM
-    if type_modulation.current() == 0:
-        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+ signal_lvl.get()
-
-        if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
-            y_signal = y_signal + signal_lvl.get()
-        elif signal_lvl.get() > 0:
-             y_signal = y_signal + 99 - s_amp
-        else:
-             y_signal = y_signal - 99 + s_amp
-
-        y_carry = np.sin((x+i/50.0)*c_frq)*c_amp*(y_signal/(s_amp*2))
-        label = 'Сигнал с fc'
-        return y_signal, y_carry, label
-
-    #FM
-    elif type_modulation.current() == 1:
-        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        #dev = 14/y_max
-        dev = 1
-        if not deviation.get().isalpha() and deviation.get() != '':
-            dev = deviation.get().replace(',', '.')
-            dev = float(dev)
-        y_carry = np.sin((x+i/50.0)*c_frq - dev*np.cos((x+i/50.0)*s_frq))*c_amp
-        label = 'Сигнал с fc'
-        return y_signal, y_carry, label
-
-    #PM
-    elif type_modulation.current() == 2:
-        dev = 0.1
-        y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
-        if not deviation.get().isalpha() and deviation.get() != '':
-            dev = deviation.get().replace(',', '.')
-            dev = float(dev)/10
-        y_old_carry = np.sin((x+i/50.0)*c_frq)*c_amp
-        y_carry = np.sin((x+i/50.0)*c_frq - dev*y_signal)*c_amp
-        #label = 'Несущее колебание'
-        label = 'Сигнал'
-        return y_old_carry, y_carry, label
 
     #PAM_1
-    elif type_modulation.current() == 3:
+    if type_modulation.current() == 0:
         y_max = s_amp
         y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+signal_lvl.get()
         
@@ -338,10 +272,11 @@ def calc_mod_ani(i):
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+y_max
         y_carry = y_signal*y_carry/(y_max*2)
         label = 'Сигнал'
-        return y_signal, y_carry, label
+        label_carry = 'Амплитудно модулированный сигнал\n(модулированные по амплитуде импульсы)'
+        return y_signal, y_carry, label, label_carry
 
     #PAM_2
-    elif type_modulation.current() == 4:
+    elif type_modulation.current() == 1:
         y_max = s_amp
         y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+signal_lvl.get()
         
@@ -355,10 +290,11 @@ def calc_mod_ani(i):
         y_carry = signal.square((x+i/50.0)*c_frq, duty=c_width)*c_amp+y_max
         y_carry = average(y_signal*y_carry/(y_max*2))
         label = 'Сигнал'
-        return y_signal, y_carry, label
+        label_carry = 'Амплитудно модулированный сигнал\n(модулированные по амплитуде импульсы)'
+        return y_signal, y_carry, label, label_carry
 
     #PWM
-    elif type_modulation.current() == 5:
+    elif type_modulation.current() == 2:
         y_signal = np.sin((x+i/50.0)*s_frq)*s_amp
         y_max = s_amp
         y_signal = (np.sin((x+i/50.0)*s_frq)*s_amp) #+signal_lvl.get()
@@ -372,10 +308,11 @@ def calc_mod_ani(i):
 
         y_carry = signal.square((x+i/50.0)*c_frq, duty=1.5*c_width*y_signal/(y_max*2)+0.08)*c_amp+ y_max
         label = 'Сигнал'
-        return y_signal, y_carry, label
+        label_carry = 'Широтно модулированный сигнал\n(модулированные по широте импульсы)'
+        return y_signal, y_carry, label, label_carry
     
     #PPM
-    elif type_modulation.current() == 6:
+    elif type_modulation.current() == 3:
         inc = i/50
         y_max = s_amp
 
@@ -396,11 +333,12 @@ def calc_mod_ani(i):
                 y_carry[i+int(dev*y_signal_changed[i]):i+int(dev*y_signal_changed[i]) +m_width] = 2*y_max
             prev = a
         
-        label = 'Несущее колебание'
-        return y_old_carry, y_carry, label
+        label = 'Сигнал'
+        label_carry = 'Фазово модулированный сигнал\n(модулированные по фазе импульсы)'
+        return y_old_carry, y_carry, label, label_carry
 
     #PFM
-    elif type_modulation.current() == 7:
+    elif type_modulation.current() == 4:
         inc = i/50
 
         y_max = s_amp
@@ -423,11 +361,12 @@ def calc_mod_ani(i):
             prev = a
 
         label = 'Сигнал'
+        label_carry = 'Частотно модулированный сигнал\n(модулированные по частоте импульсы)'
         y_signal = (np.sin((x+inc)*s_frq)*s_amp)+y_max
-        return y_signal, y_carry, label
+        return y_signal, y_carry, label, label_carry
 
     #PCM
-    elif type_modulation.current() == 8:
+    elif type_modulation.current() == 5:
     # hash with quant coridors and binary values aka {'00': [-25, 25]}
     # cursors that takes a value of signal and then we check it in quant coridors and display binary value
     # or izi method with animated plot without customization, but looks nice 
@@ -485,9 +424,9 @@ c_line, = c_ax.plot(x, y_carry)
 y_signal = (np.sin((x)*s_frq)*s_amp)+y_max
 y_max = max(y_signal)
 y_carry = y_carry*(y_signal/y_max)
-cm_line, = m_ax.plot(x, y_carry, 'r')
+cm_line, = m_ax.plot(x, y_carry, 'k')
 spm_line, = m_ax.plot(x, y_signal, 'k')
-sm_line, = m_ax.plot(x, y_signal, 'k')
+sm_line, = m_ax.plot(x, y_signal, 'r', linewidth = 0.75)
 
 s_ax.cla()
 c_ax.cla()
@@ -499,8 +438,9 @@ normalize(m_ax)
 
 s_ax.legend([s_line], ['Сигнал с fc'], loc = 'upper center', frameon=False)
 c_ax.legend([c_line], ['Несущее колебание с fн'], loc = 'upper center', frameon=False)
-m_ax.legend([cm_line, sm_line], ['Модулированное несущее колебание', ' '], loc = 'upper center', frameon=False, ncol=2)
-subsignal_label = m_ax.text(0.7, 0.90, '', transform=m_ax.transAxes)
+m_ax.legend([cm_line, sm_line], ['                                                                                  ', ' '], loc = 'upper center', frameon=False, ncol=2)
+subsignal_label = m_ax.text(0.75, 0.90, '', transform=m_ax.transAxes)
+subcarry_label = m_ax.text(0.30, 0.85, '', transform=m_ax.transAxes)
 #c_repeatable_point = int(250 * c_frq / 10)
 
 a1 = animation.FuncAnimation(fig, s_ani, np.arange(1, 315), interval=20, blit=True)
