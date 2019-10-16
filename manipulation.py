@@ -259,7 +259,7 @@ normalize(m_ax)
 
 s_ax.legend([s_line], ['Сигнал'], loc = 'upper center', frameon=False)
 c_ax.legend([c_line], ['Несущее колебание'], loc = 'upper center', frameon=False)
-m_ax.legend([cm_line, sm_line], ['Модулированное несущее колебание', 'Сигнал'], loc = 'upper center', frameon=False, ncol=2)
+m_ax.legend([cm_line, sm_line], ['Модулированный сигнал', 'Сигнал'], loc = 'upper center', frameon=False, ncol=2)
 
 
 

@@ -99,6 +99,7 @@ plot_container_carry.configure(background = background_, foreground = foreground
 signal_lvl = tk.IntVar()
 signal_scale = tk.Scale(root, from_ = 100, to = -100, bg = 'white', length = 300, variable = signal_lvl)
 signal_scale.place(x = 5, y = 100)
+signal_lvl.set(25)
 
 up_button = tk.Button(root, text = '+', command = scale_up, font = font_, bg = 'white', width = 2)
 up_button.place(x = 5, y = 60)
@@ -109,7 +110,7 @@ down_button.place(x = 5, y = 405)
 #Signal frequency
 #signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Сигнал:', font = font_)
 #signal_freq_lbl.grid(row = 0, column = 1, sticky = ('E', 'S'), padx = (5, 5), pady = 5)
-signal_freq_lbl = ttk.Label(signal_settings, text = 'Частота', font = font_)
+signal_freq_lbl = ttk.Label(signal_settings, text = 'Частота (f c)', font = font_)
 signal_freq_lbl.grid(row = 1, column = 1, sticky = ('E', 'S'), padx = (40, 5), pady = 15)
 signal_freq = tk.IntVar()
 signal_freq.set(2)
@@ -129,7 +130,7 @@ signal_amp_box.bind('<Return>', func)
 #Carrying frequency
 #signal_freq_lbl = ttk.Label(plot_container_settings, text = 'Несущее колебание:', font = font_)
 #signal_freq_lbl.grid(row = 3, column = 1, sticky = ('E', 'S'), padx = (5, 5), pady = (30, 5))
-carry_freq_lbl = ttk.Label(carry_settings, text = 'Частота', font = font_)
+carry_freq_lbl = ttk.Label(carry_settings, text = 'Частота (f н)', font = font_)
 carry_freq_lbl.grid(row = 4, column = 1, sticky = ('E', 'S'), padx = (65, 5), pady = 15)
 carry_freq = tk.IntVar()
 carry_freq.set(40)
@@ -170,22 +171,26 @@ def c_ani(i):
     return c_line,
 
 def m_ani(i):
-    y_signal = (np.sin((x-i/50.0)*s_frq)*s_amp)
+    y_envelope_up = (np.sin((x-i/50.0)*s_frq)*s_amp)
+    y_envelope_down = (np.sin((x-i/50.0)*s_frq+np.pi)*s_amp)
 
-    if (max(y_signal) + signal_lvl.get()) < 99 and (min(y_signal) + signal_lvl.get()) > -99:
-        y_signal = y_signal + signal_lvl.get()
+    if (max(y_envelope_up) + signal_lvl.get()) < 99 and (min(y_envelope_up) + signal_lvl.get()) > -99:
+        y_envelope_up = y_envelope_up + signal_lvl.get()
+        y_envelope_down = y_envelope_down - signal_lvl.get()
     elif signal_lvl.get() > 0:
-        y_signal = y_signal + 99 - s_amp
+        y_envelope_up = y_envelope_up + 99 - s_amp
+        y_envelope_down = y_envelope_down - 99 + s_amp
     else:
-        y_signal = y_signal - 99 + s_amp
+        y_envelope_up = y_envelope_up - 99 + s_amp
+        y_envelope_down = y_envelope_down + 99 - s_amp
     
-    cm_line.set_ydata(np.sin((x-i/50.0)*c_frq)*c_amp*(y_signal/(s_amp*2)))
-    sm_line.set_ydata(y_signal)
-    sm_line.set_color('k')
-    spm_line.set_ydata(0)
-    subsignal_label.set_text('Сигнал')
+    cm_line.set_ydata(np.sin((x-i/50.0)*c_frq)*c_amp*(y_envelope_up/(s_amp*2)))
+    sm_line.set_ydata(y_envelope_up)
+    #sm_line.set_color('red')
+    spm_line.set_ydata(y_envelope_down)
+    #subsignal_label.set_text('Сигнал')
 
-    return cm_line, sm_line, spm_line, subsignal_label
+    return cm_line, sm_line, spm_line#, subsignal_label
 
 def normalize(ax):
     ax.set_xlim(0, 10)
@@ -228,9 +233,9 @@ c_line, = c_ax.plot(x, y_carry)
 y_signal = (np.sin((x)*s_frq)*s_amp)+y_max
 y_max = max(y_signal)
 y_carry = y_carry*(y_signal/y_max)
-cm_line, = m_ax.plot(x, y_carry, 'r')
-spm_line, = m_ax.plot(x, y_signal, 'k')
-sm_line, = m_ax.plot(x, y_signal, 'k', linewidth=0.5)
+cm_line, = m_ax.plot(x, y_carry, 'g')
+spm_line, = m_ax.plot(x, y_signal, 'b', linewidth=2)
+sm_line, = m_ax.plot(x, y_signal, 'r', linewidth=2)
 
 s_ax.cla()
 c_ax.cla()
@@ -240,10 +245,12 @@ normalize(s_ax)
 normalize(c_ax)
 normalize(m_ax)
 
-s_ax.legend([s_line], ['Сигнал'], loc = 'upper center', frameon=False)
-c_ax.legend([c_line], ['Несущее колебание'], loc = 'upper center', frameon=False)
-m_ax.legend([cm_line, sm_line], ['Амплитудно модулированный сигнал', ' '], loc = 'upper center', frameon=False, ncol=2)
-subsignal_label = m_ax.text(0.87, 0.93, '', transform=m_ax.transAxes)
+s_ax.legend([s_line], ['Сигнал с fс'], loc = 'upper center', frameon=False)
+c_ax.legend([c_line], ['Несущее колебание c fн'], loc = 'upper center', frameon=False)
+m_ax.legend([cm_line], ['Амплитудно модулированный сигнал\n(модулированное по амплитуде колебание)'], loc = 'upper center', frameon=False)
+fig_modulation.legend([sm_line, spm_line], ['Верхняя огибающая', 'Нижняя огибающая'], loc = 'lower center', frameon=False, ncol=2)
+#subsignal_label = m_ax.text(0.87, 0.93, 'lkj', transform=m_ax.transAxes)
+
 
 a1 = animation.FuncAnimation(fig_signal, s_ani, np.arange(1, 315), interval=20, blit=True)
 a2 = animation.FuncAnimation(fig_carry, c_ani, np.arange(1, 127), interval=20, blit=True)
