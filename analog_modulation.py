@@ -208,7 +208,8 @@ type_modulation.bind('<<ComboboxSelected>>', change_modulation)
 
 deviation = tk.StringVar()
 deviation_lbl = ttk.Label(root, text = 'Девиация', font = font_)
-deviation_input = ttk.Entry(root, textvariable = deviation, font = font_)
+# deviation_input = ttk.Entry(root, textvariable = deviation, font = font_)
+deviation_input = tk.Spinbox(root, from_ = 0, to = 20, textvariable = deviation, font = font_, foreground = foreground_, command = func, increment = 0.5)
 
 white_label = ttk.Label(root, text = '             ', font = font_, background = 'white')
 
